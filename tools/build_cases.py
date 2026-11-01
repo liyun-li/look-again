@@ -8,7 +8,8 @@ import json, re, os, sys, time, html, urllib.request, urllib.error, hashlib, dat
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, 'cases.json')
-CLUES = os.path.join(ROOT, 'clues.json')   # hand-written clue ladders {uid: {"en": [...], "zh": [...]}}
+CLUES = os.path.join(ROOT, 'clues.json')
+CLUES2 = os.path.join(ROOT, 'clues2.json')  # 2-clue format {uid: {en:[c1,c2], zh:[c1,c2], meta?}} (preferred when present)   # hand-written clue ladders {uid: {"en": [...], "zh": [...]}}
 IMG = os.path.join(ROOT, 'img')
 API = 'https://api.fbi.gov/wanted/v1/list?page=%d&pageSize=50'
 UA = 'Mozilla/5.0 (compatible; look-again-game/1.0; +https://liyun-li.github.io/look-again/)'
@@ -102,7 +103,7 @@ LANG = {'English':'英語','Spanish':'西班牙語','Arabic':'阿拉伯語','Far
 
 # ---- clue ladder: short lines, vague -> specific ----
 MAX_CLUES = 5
-ZH_BAD = re.compile(r'(?<![其利])他(?![人國處方者])|男孩|女孩|兒子|女兒|丈夫|妻子|父親|母親|她|男子|女子|男性|女性|男人|女人|先生|女士|白人|黑人|亞裔|非裔|拉丁裔|西語裔|膚|髮|鬍|刺青|紋身|身高|體重|眼睛|族裔|種族|原住民')
+ZH_BAD = re.compile(r'(?<![其利猶吉])他(?![人國處方者])|男孩|女孩|兒子|女兒|丈夫|妻子|父親|母親|她|男子|女子|男性|女性|男人|女人|先生|女士|白人|黑人|亞裔|非裔|拉丁裔|西語裔|膚|髮|鬍|刺青|紋身|身高|體重|眼睛|族裔|種族|原住民')
 EN_PRON = re.compile(r"\b(he|she|him|her|his|hers|himself|herself|man|woman|men|women|boy|girl|sons?|daughters?|wife|wives|husbands?|mothers?|fathers?|brothers?|sisters?|boys|girls|aunt|uncle|niece|nephew|girlfriend|boyfriend|gentleman|lady)\b", re.I)
 EN_TITLE = re.compile(r"\b(Mr|Mrs|Ms|Miss)\b\.?(?!-)")
 def _load_hand():
@@ -151,11 +152,66 @@ def fallback_clues(k):
     if ex: en.append('“%s”' % ex); zh.append('〔英文原文〕“%s”' % ex)
     return {'en': en, 'zh': zh}
 
+# ---- 2-clue format: clue 1 shown at once, clue 2 is the single optional hint. Era/office/reward go to a meta line. ----
+META_EN = re.compile(r'^(A case from the|The case dates|No reward amount|Reward offered|Key year on the poster|Listed age about)')
+HAND2 = None
+def _load_hand2():
+    try:
+        d = json.load(open(CLUES2))
+        d = d.get('cases', d) if isinstance(d, dict) else {}
+        return {u: v for u, v in d.items() if isinstance(v, dict) and isinstance(v.get('en'), list)}
+    except Exception: return {}
+
+def _ok_pair(e, z, names):
+    e, z = str(e).strip(), str(z).strip()
+    return bool(e and z) and not _bad_en(e, names) and not ZH_BAD.search(z) and len(z) <= 60 and not re.search(r'9{2},?9{3}', e + z)
+
+def meta_line(k):
+    en, zh = [], []
+    if k.get('y'): d = k['y'] // 10 * 10; en.append('%ds' % d); zh.append('%d 年代' % d)
+    if k.get('of'): en.append('FBI %s' % k['of']); zh.append('FBI %s分局' % k['ofz'])
+    elif k.get('pl'): en.append(k['pl']); zh.append(k.get('plz') or k['pl'])
+    en.append('Reward up to %s' % _money_en(k['rw']) if k.get('rw') else 'No reward listed')
+    zh.append('懸賞最高 %s' % _money_zh(k['rw']) if k.get('rw') else '未列懸賞')
+    return {'en': ' · '.join(en), 'zh': ' · '.join(zh)}
+
+def two_clues(c, names):
+    """Returns (cl, source). '2' = clues2.json, 'l' = two most specific lines of the old ladder, 'f' = field fallback."""
+    global HAND, HAND2
+    if HAND2 is None: HAND2 = _load_hand2()
+    if HAND is None: HAND = _load_hand()
+    names = set() if c.get('c') == 'seeking' else {n for n in names if n not in NAME_SKIP}
+    h = HAND2.get(c['id'])
+    if h:
+        pairs = list(zip(h.get('en') or [], h.get('zh') or []))[:2]
+        if len(pairs) == 2 and all(_ok_pair(e, z, names) for e, z in pairs):
+            return {'en': [str(e).strip() for e, _ in pairs], 'zh': [str(z).strip() for _, z in pairs]}, '2'
+    keep = []
+    h = HAND.get(c['id'])
+    if h:
+        keep = [(str(e).strip(), str(z).strip()) for e, z in zip(h.get('en') or [], h.get('zh') or [])
+                if not META_EN.search(str(e).strip()) and _ok_pair(e, z, names)][-2:]
+    src = 'l'
+    if len(keep) < 2:   # add a hint line: languages, work, the redacted FBI excerpt, or the key year / age line
+        src = 'l' if keep else 'f'
+        f = fallback_clues(c['k'])
+        def _w(t): return {w for w in re.findall(r'[a-z]{4,}', t.lower())}
+        def _people(e): return re.search(r"\b[A-Z]{2,} [A-Z][a-z]+|\b[A-Z][a-z]+(?:ovich|evich|ovna|yevich)\b|(?:\b[A-Z][a-z]+ [A-Z][a-z]+, ){2,}", e)
+        pad = [(e, z) for e, z in zip(f['en'], f['zh']) if re.match(r'(Speaks|Work:)', e)]
+        pad += [(e, z) for e, z in zip(f['en'], f['zh']) if e.startswith('“') and '▇▇' in e and not _people(e)]
+        if h: pad += [(e, z) for e, z in zip(h.get('en') or [], h.get('zh') or []) if str(e).startswith(('Key year', 'Listed age'))]
+        pad = [(str(e).strip(), str(z).strip()) for e, z in pad if _ok_pair(e, z, names)]
+        while len(keep) < 2 and pad:
+            e, z = pad.pop(0); W = _w(e)
+            if keep and W and len(W & _w(keep[0][0])) * 2 >= len(W): continue   # says the same thing as the clue we have
+            keep.append((e, z))
+        if not keep: return {'en': f['en'][-2:], 'zh': f['zh'][-2:]}, 'f'
+    return {'en': [e for e, _ in keep], 'zh': [z for _, z in keep]}, src
+
 def add_clues(c, names=None):
     names = names if names is not None else set()
-    h = hand_clues(c, names)
-    c['k']['cl'] = h or fallback_clues(c['k'])
-    c['k']['cs'] = 'h' if h else 'f'
+    c['k']['cl'], c['k']['cs'] = two_clues(c, names)
+    c['k']['mt'] = meta_line(c['k'])
 
 # ONE switch for missing-person cases (FBI "Kidnappings and Missing Persons" / ViCAP missing). The game
 # adapts automatically (daily mix, options, end-screen stats). Env LA_INCLUDE_MISSING=0 overrides for a test run.
@@ -477,7 +533,7 @@ if __name__ == '__main__':
             c['k']['rw'] = reward_amt({'reward_max': c['k'].get('rw') or 0, 'reward_text': c['r'].get('rw') or ''})
             add_clues(c, names_of({'title': c['title']}))
         open(OUT, 'w').write(json.dumps(d, ensure_ascii=False, separators=(',', ':')))
-        print('reclued', len(d['cases']), 'hand', sum(c['k']['cs'] == 'h' for c in d['cases'])); sys.exit(0)
+        print('reclued', len(d['cases']), 'sources', {x: sum(c['k']['cs'] == x for c in d['cases']) for x in '2lf'}); sys.exit(0)
     if '--from' in sys.argv:
         items = json.load(open(sys.argv[sys.argv.index('--from') + 1]))
         cases, skipped = build(items)
