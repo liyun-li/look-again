@@ -253,8 +253,8 @@ const S={en:{
  sh:(n,p,mx)=>`Look Again 🔎 Docket #${n} · ${p}/${mx}`,shE:(p,c)=>`Look Again 🔎 Endless · ${p} pts in ${c} cases`,shStreak:n=>`🔥 ${n}-day streak`,
  helpT:"💛 Help find them",helpP:"Not a game. These people are missing; if you know anything, tell the FBI.",since:y=>`Missing since ${y}`,tipS:"Tip ↗",
  bookT:"📒 Casebook",bookEmpty:"Cases you play show up here. Come back later: when the FBI takes a poster down, you’ll see it here.",
- bookIntro:(n,k)=>`${n} cases played · ${k} closed`,
- closed:"Case closed: no longer on the FBI list",closedWhy:"The FBI took this poster down. That can mean an arrest, a resolution, or another reason; the FBI doesn’t always say.",
+ bookIntro:(n,k)=>`${n} cases played${k?` · ${k} no longer listed`:''}`,
+ closed:"No longer on the FBI list",closedWhy:"The FBI took this poster down. That can mean an arrest, a resolution, or another reason; the FBI doesn’t always say.",
  stillOpen:"Still on the FBI list",played:d=>`played ${d}`,
  fullFiled:"FBI list",fullDesc:"Poster",fullText:"Details (FBI wording)",fullRm:"Remarks",fullRw:"Reward",fullW:"Warning",
  cutNote:"Descriptions of appearance are left out here. The FBI page has the full poster.",
@@ -285,8 +285,8 @@ const S={en:{
  sh:(n,p,mx)=>`再看一眼 🔎 案卷 #${n}・${p}/${mx}`,shE:(p,c)=>`再看一眼 🔎 無盡模式・${c} 案 ${p} 分`,shStreak:n=>`🔥 連續 ${n} 天`,
  helpT:"💛 幫忙找到他們",helpP:"這不是遊戲。這些人仍下落不明，若你知道任何消息，請告訴 FBI。",since:y=>`${y} 年起失蹤`,tipS:"提供線索 ↗",
  bookT:"📒 辦案筆記",bookEmpty:"玩過的案件會出現在這裡。之後再回來看看：FBI 撤下公告時，這裡會告訴你。",
- bookIntro:(n,k)=>`玩過 ${n} 案・${k} 案已結`,
- closed:"已結案：已不在 FBI 名單上",closedWhy:"FBI 已撤下這張公告。可能是已逮捕、已解決或其他原因，FBI 不一定會說明。",
+ bookIntro:(n,k)=>`玩過 ${n} 案${k?`・${k} 案已不在名單上`:''}`,
+ closed:"已不在 FBI 名單上",closedWhy:"FBI 已撤下這張公告。可能是已逮捕、已解決或其他原因，FBI 不一定會說明。",
  stillOpen:"仍在 FBI 名單上",played:d=>`${d} 玩過`,
  fullFiled:"FBI 名單",fullDesc:"公告",fullText:"案情（FBI 英文原文）",fullRm:"備註",fullRw:"懸賞",fullW:"警告",
  cutNote:"此處略去外貌描述；完整公告請見 FBI 官方頁面。",
@@ -299,7 +299,7 @@ const LS={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return 
 let L=(()=>{const q=new URLSearchParams(location.search).get('lang');if(q)return /^zh/i.test(q)?'zh':'en';const s=LS.get('la_lang');if(s)return s;
  const ls=navigator.languages||[navigator.language||'en'];for(const l of ls){if(/^zh/i.test(l))return 'zh';if(/^en/i.test(l))return 'en'}return 'en'})();
 const T=k=>S[L][k];
-let DATA=null,BYID={},POOL={},MISSING=[],CLUES={en:null,zh:null},CLOSED={},run=null,lastEnd=null;
+let DATA=null,BYID={},POOL={},MISSING=[],run=null,lastEnd=null;
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c])}
 // ---- seeded randomness (same docket for everyone on a date) ----
 function h32(s){let h=2166136261>>>0;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
@@ -312,21 +312,17 @@ function grpSet(c){const s=new Set([grp(c)]);for(const a of c.all||[])if(GMAP[a]
 // ---- data ----
 async function getJSON(u,tries,opt){for(let k=0;k<tries;k++){try{const r=await fetch(u,{cache:'no-cache'});if(!r.ok){if(opt&&r.status===404)return null;throw 0}return await r.json()}catch(e){if(k<tries-1)await new Promise(r=>setTimeout(r,600*(k+1)))}}if(opt)return null;throw new Error('load')}
 const withTimeout=(p,ms)=>Promise.race([p,new Promise(r=>setTimeout(()=>r(null),ms))]);
-function loadClues(l){if(CLUES[l]||CLUES[l+'P'])return CLUES[l+'P']||Promise.resolve(CLUES[l]);
- return CLUES[l+'P']=getJSON(`clues_${l}.json`,2,true).then(d=>{CLUES[l]=d&&typeof d==='object'?d:{};return CLUES[l]}).catch(()=>{CLUES[l]={};return CLUES[l]})}
 let loadP=null;
 function boot(){loadP=getJSON('cases.json',3).then(d=>{if(!d.cases||!d.cases.length)throw new Error('empty');DATA=d;BYID={};POOL={};MISSING=[];
  for(const c of d.cases){BYID[c.id]=c;const g=grp(c);if(g&&c.im)(POOL[g]=POOL[g]||[]).push(c);else if(c.c==='missing'&&c.im)MISSING.push(c)}
  $('upd').textContent=T('updated')(fmtDate(d.updated),d.n);renderStart();return d});
- getJSON('closed.json',1,true).then(d=>{if(d&&typeof d==='object'){CLOSED=d.cases||d;renderStart()}}).catch(()=>{});
  return loadP}
 boot().catch(()=>{});
-loadClues(L);
 function fmtDate(iso){const d=new Date(String(iso).replace(/Z$/,':00Z'));if(isNaN(d))return String(iso).slice(0,10);
  return d.toLocaleDateString(L==='zh'?'zh-TW':'en-US',{year:'numeric',month:'short',day:'numeric'})}
 function money(n){if(!n)return '';if(L==='zh'){const w=n/1e4;return (w>=1?(w>=1e4?(w/1e4).toLocaleString('zh-TW')+' 億':w.toLocaleString('zh-TW',{maximumFractionDigits:1})+' 萬'):n.toLocaleString('zh-TW'))+' 美元'}
  return n>=1e6?'$'+(n/1e6).toLocaleString('en-US',{maximumFractionDigits:1})+' million':'$'+n.toLocaleString('en-US')}
-// ---- clue ladders: curated file first, heuristic fallback from redacted poster fields ----
+// ---- clue ladders: cases.json k.cl (built + validated by tools/build_cases.py), heuristic only if a case has none ----
 function heur(c){const k=c.k,H=S[L].h,o=[];
  if(k.y||k.age!=null)o.push(esc(H.when(k.y,k.age)));
  if(k.of)o.push(esc(H.office(L==='zh'?k.ofz:k.of)));else if(k.pl)o.push(esc(H.place(L==='zh'?k.plz:k.pl)));
@@ -335,7 +331,7 @@ function heur(c){const k=c.k,H=S[L].h,o=[];
  else if(k.oc)o.push(esc(H.work('\u0001'+k.oc.join(', ')+'\u0002')).replace('\u0001','<span lang="en" class="en">').replace('\u0002','</span>'));
  if(k.ex){const e=esc(k.ex).replace(/▇▇/g,'<mark aria-label="redacted">▇▇</mark>');o.push(esc(H.ex('\u0001')).replace('\u0001',`<span lang="en" class="en">${e}</span>`))}
  return o.slice(-5)}
-function cluesOf(c){const f=(CLUES[L]&&CLUES[L][c.id])||(c.k.cl&&c.k.cs==='h'&&c.k.cl[L]);
+function cluesOf(c){const f=c.k&&c.k.cl&&c.k.cl[L];
  if(Array.isArray(f)){const v=f.filter(x=>typeof x==='string'&&x.trim()).slice(0,5);if(v.length>=3)return v.map(x=>esc(x).replace(/▇+/g,m=>`<mark aria-label="redacted">${m}</mark>`))}
  return heur(c)}
 // ---- runs ----
@@ -361,7 +357,7 @@ function hud(){if(!run)return;const sc=score();
  if(run.mode==='d'){$('hud').textContent=`${Math.min(run.i+1,run.ids.length)}/${run.ids.length} · ${sc} ${L==='zh'?'分':'pts'}`;$('prog').style.width=(run.res.length/run.ids.length*100)+'%'}
  else{$('hud').textContent=`${'❤️'.repeat(run.lives)}${'🖤'.repeat(LIVES-run.lives)} · ${sc}`;$('prog').style.width=((LIVES-run.lives)/LIVES*100)+'%'}}
 const preloaded=new Set();
-function preload(c){if(!c||!c.im||preloaded.has(c.im))return;preloaded.add(c.im);const i=new Image();i.decoding='async';i.src=c.im}
+// Portraits are never requested before the guess for that case (no preloading), so the face can't leak via cache or devtools.
 function renderRound(fresh){
  const c=cur(),done=run.res.length>run.i,cl=cluesOf(c),N=cl.length;run.n=Math.max(1,Math.min(run.n,N));
  $('caseNo').textContent=run.mode==='d'?T('caseD')(run.i+1,run.ids.length):T('caseE')(run.i+1);
@@ -373,15 +369,14 @@ function renderRound(fresh){
  $('opts').innerHTML=run.opts[run.i].map((b,j)=>`<button type="button" data-b="${b}" id="b${j}"><span aria-hidden="true">${j+1} </span>${esc(CAT[b][L])}</button>`).join('');
  $('opts').querySelectorAll('button').forEach(btn=>btn.onclick=()=>answer(btn.dataset.b));
  $('game').classList.toggle('done',done);
- if(done)renderReveal(true);else{preload(c);fit()}
+ if(done)renderReveal(true);else fit()
  hud()}
 function fit(){const e=$('clues');let k=1.45;e.style.setProperty('--k',k);while(e.scrollHeight>e.clientHeight+1&&k>.6){k-=.05;e.style.setProperty('--k',k.toFixed(2))}}
 function moreClue(){if(run.res.length>run.i)return;const N=cluesOf(cur()).length;if(run.n>=N)return;run.n++;save();renderRound(true);bump($('worth'));if(navigator.vibrate)try{navigator.vibrate(8)}catch(e){}}
 $('clueBtn').onclick=moreClue;
 function answer(b){if(run.res.length>run.i)return;const c=cur(),ok=b===grp(c),p=ok?PTS[run.n-1]:0;
  run.res.push({b,n:run.n,ok,p});if(run.mode==='e'&&!ok)run.lives--;save();addBook(c,ok,p);
- $('game').classList.add('done');renderReveal(false);hud();bump($('hud'));if(navigator.vibrate)try{navigator.vibrate(ok?[15,30,15]:[40])}catch(e){}
- preload(BYID[run.ids[run.i+1]])}
+ $('game').classList.add('done');renderReveal(false);hud();bump($('hud'));if(navigator.vibrate)try{navigator.vibrate(ok?[15,30,15]:[40])}catch(e){}}
 function nameOf(c){return (c.title||'').split(/ - | – /)[0]}
 function renderReveal(re){const c=cur(),x=run.res[run.i],g=grp(c);
  $('opts').querySelectorAll('button').forEach(e=>{e.disabled=true;e.classList.toggle('right',e.dataset.b===g);e.classList.toggle('wrong',e.dataset.b===x.b&&!x.ok)});
@@ -421,10 +416,8 @@ function addBook(c,ok,p){const b=(LS.get('la2_book')||[]).filter(x=>x.id!==c.id)
 function closedIds(){if(!DATA)return[];return (LS.get('la2_book')||[]).filter(x=>!BYID[x.id]).map(x=>x.id)}
 function newClosed(){const seen=new Set(LS.get('la2_closedSeen')||[]);return closedIds().filter(i=>!seen.has(i)).length}
 const RES={captured:['Captured','已逮捕'],surrendered:['Surrendered','已自首'],located:['Located','已尋獲'],recovered:['Recovered','已尋回'],resolved:['Resolved','已解決']};
-function closedNote(id){const r=DATA&&DATA.res&&DATA.res[id],rs=r&&RES[r]?`<br><b>${esc((L==='zh'?'FBI 標示狀態：':'FBI status: ')+RES[r][L==='zh'?1:0])}</b>`:'';
- const z=CLOSED&&CLOSED[id];if(!z||typeof z!=='object')return rs;
- const n=L==='zh'?(z.note_zh||z.zh||z.note):(z.note_en||z.en||z.note);const when=z.removed||z.closed||z.date||'';
- return rs+`${n?`<br><span>${esc(n)}</span>`:''}${when?`<br><small>${esc(String(when).slice(0,10))}</small>`:''}`}
+// Only the FBI API's own status (cases.json "res") may say found/caught; nothing is inferred from a poster disappearing.
+function closedNote(id){const r=DATA&&DATA.res&&DATA.res[id];return r&&RES[r]?`<br><b>${esc((L==='zh'?'FBI 標示狀態：':'FBI status: ')+RES[r][L==='zh'?1:0])}</b>`:''}
 function openBook(){const b=LS.get('la2_book')||[];const cl=closedIds();let h='';
  if(!b.length)h=`<p>${esc(T('bookEmpty'))}</p>`;
  else{h=`<p>${esc(T('bookIntro')(b.length,cl.length))}</p><ul>`+b.map(x=>{const live=BYID[x.id];
@@ -470,18 +463,17 @@ function renderStart(){const day=today(),dn=dayNo(day),d=LS.get('la2_daily'),res
  else if(d&&d.day===day&&d.res.length)$('dailyBtn').innerHTML=T('dailyRes')(dn,d.i);
  else $('dailyBtn').innerHTML=T('daily')(dn);
  $('endlessBtn').innerHTML=T('endless')(LS.get('la2_best')||0);
- const b=(LS.get('la2_book')||[]).length,nc=DATA?newClosed():0;$('bookBtn').innerHTML=esc(T('bookB')(b))+(nc?`<span class="dot" aria-label="${nc} closed">${nc}</span>`:'')}
+ const b=(LS.get('la2_book')||[]).length,nc=DATA?newClosed():0;$('bookBtn').innerHTML=esc(T('bookB')(b))+(nc?`<span class="dot" aria-label="${nc} ${L==='zh'?'案已不在名單上':'no longer listed'}">${nc}</span>`:'')}
 async function start(mode,fromBtn){
  show('game');$('loading').hidden=false;$('retryBtn').hidden=true;$('loading').firstElementChild.textContent=T('loading');
  $('game').classList.add('wait');$('game').classList.remove('done');$('opts').innerHTML='';$('hud').textContent='';
  try{await (loadP||boot())}catch(e){loadP=null;$('loading').firstElementChild.textContent=T('loadFail');$('retryBtn').hidden=false;$('retryBtn').onclick=()=>start(mode);return}
- await withTimeout(loadClues(L),4000);
  $('loading').hidden=true;$('game').classList.remove('wait');
  if(mode==='d'){const day=today(),res=(LS.get('la2_dres')||{})[day];
   if(res){const d=LS.get('la2_daily');lastEnd=d&&d.day===day?d:{mode:'d',day,ids:res.ids,res:res.res};show('end');renderEnd();return}
   const d=LS.get('la2_daily');if(d&&d.day===day&&d.ids.every(i=>BYID[i]))run=d;else newDaily()}
  else{const e=LS.get('la2_endless');if(e&&e.lives>0&&e.ids.every(i=>BYID[i]))run=e;else newEndless()}
- renderRound(true);run.ids.slice(run.i,run.i+2).forEach(i=>preload(BYID[i]));$('b0')&&$('b0').focus({preventScroll:true})}
+ renderRound(true);$('b0')&&$('b0').focus({preventScroll:true})}
 $('dailyBtn').onclick=()=>start('d');$('endlessBtn').onclick=()=>start('e');
 $('logo').onclick=()=>{closeDlg();show('start');renderStart()};
 function applyLang(){
@@ -493,7 +485,7 @@ function applyLang(){
  if(DATA)$('upd').textContent=T('updated')(fmtDate(DATA.updated),DATA.n);
  $('book2Btn').setAttribute('aria-label',T('book').replace('📒 ',''));$('book2Btn').title=$('book2Btn').getAttribute('aria-label');$('dlgX').setAttribute('aria-label',L==='zh'?'關閉':'Close');
  renderStart();
- if($('game').classList.contains('on')&&run&&!$('game').classList.contains('wait'))loadClues(L).then(()=>renderRound(false));
+ if($('game').classList.contains('on')&&run&&!$('game').classList.contains('wait'))renderRound(false);
  if($('end').classList.contains('on'))renderEnd()}
 $('langBtn').onclick=()=>{L=L==='zh'?'en':'zh';LS.set('la_lang',L);applyLang()};
 addEventListener('resize',()=>{if($('game').classList.contains('on')&&run&&!$('game').classList.contains('done'))fit()});
