@@ -39,7 +39,7 @@ GRAPHIC = re.compile(r"dismember|decapitat|mutilat|tortur|\brap(e|ed|es|ing|ist)
     r"incest|pedophil|child abuse|minor victim|enticement|lewd|genital", re.I)
 DEATH = re.compile(r"murder\w*|\bkill\w*|homicide|\bshot\b|shooting|\bdeath\b|\bdied\b|deceased|found dead|homicide victim|was killed|were killed|murder of (a |an )?(\d|child|infant|baby|toddler|girl|boy)", re.I)
 
-PHYS = re.compile(r"\b(white|black|hispanic|latino|latina|latinx|asian|caucasian|african|race|racial|ethnic\w*|complexion|skin|hair|bald|eyes?|"
+PHYS = re.compile(r"\b(white|black(?! Hills)|hispanic|latino|latina|latinx|asian|caucasian|african|(?<!presidential )race|racial|ethnic\w*|complexion|skin|hair|bald|eyes?|"
     r"tattoo\w*|scars?|pierc\w*|birthmark|mole|weigh\w*|pounds|lbs|height|feet tall|\d'\d|build|freckle\w*|beard|mustache|"
     r"moustache|glasses|teeth|tooth|accent|native american|american indian|alaska native|indigenous|skinned|light-skinned|dark-skinned|"
     r"tribe|tribal|enrolled member|male|female|wearing|wore|dressed|clothing|shirt|pants|jeans|jacket|shoes|sneakers|hoodie|cap)\b", re.I)
@@ -103,8 +103,8 @@ LANG = {'English':'英語','Spanish':'西班牙語','Arabic':'阿拉伯語','Far
 
 # ---- clue ladder: short lines, vague -> specific ----
 MAX_CLUES = 5
-ZH_BAD = re.compile(r'(?<![其利猶吉])他(?![人國處方者])|男孩|女孩|兒子|女兒|丈夫|妻子|父親|母親|她|男子|女子|男性|女性|男人|女人|先生|女士|白人|黑人|亞裔|非裔|拉丁裔|西語裔|膚|髮|鬍|刺青|紋身|身高|體重|眼睛|族裔|種族|原住民')
-EN_PRON = re.compile(r"\b(he|she|him|her|his|hers|himself|herself|man|woman|men|women|boy|girl|sons?|daughters?|wife|wives|husbands?|mothers?|fathers?|brothers?|sisters?|boys|girls|aunt|uncle|niece|nephew|girlfriend|boyfriend|gentleman|lady)\b", re.I)
+ZH_BAD = re.compile(r'(?<![其利猶吉科])他(?![人國處方者們])|男孩|女孩|兒子|女兒|丈夫|妻子|父親|母親|她|男子|女子|男性|女性|男人|女人|先生|女士|白人|黑人|亞裔|非裔|拉丁裔|西語裔|膚|(?<!理)髮|鬍|刺青|紋身|身高|體重|眼睛|族裔|種族(?!隔離)|原住民')
+EN_PRON = re.compile(r"\b(?!Mother of Christ)(he|she|him|her|his|hers|himself|herself|man|woman|men|women|boy|girl|sons?|daughters?|wife|wives|husbands?|mothers?|fathers?|brothers?|sisters?|boys|girls|aunt|uncle|niece|nephew|girlfriend|boyfriend|gentleman|lady)\b", re.I)
 EN_TITLE = re.compile(r"\b(Mr|Mrs|Ms|Miss)\b\.?(?!-)")
 def _load_hand():
     try: return json.load(open(CLUES))
