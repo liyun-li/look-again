@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>About · Look Again 🔎</title><meta name="theme-color" content="#121519">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}html,body{overflow-x:clip}
+body{background:#121519;color:#eef0f2;font:1rem/1.55 system-ui,-apple-system,"Segoe UI",Roboto,"PingFang TC","Noto Sans TC","Noto Sans CJK TC","Microsoft JhengHei",sans-serif;display:flex;justify-content:center}
+main{width:100%;max-width:40rem;padding:calc(1rem + env(safe-area-inset-top)) calc(1rem + env(safe-area-inset-right)) 2rem calc(1rem + env(safe-area-inset-left))}
+h1{font:900 1.6rem ui-monospace,Menlo,Consolas,monospace;letter-spacing:.05em}h1 b{color:#f0b429}
+h2{font-size:1.05rem;margin:1.4rem 0 .4rem;color:#f0b429}p,li{color:#d5dae0;overflow-wrap:anywhere}ul{padding-left:1.2rem}li+li{margin-top:.3rem}
+a{color:#9fd0ff}.tip{display:inline-block;margin:.6rem 0;background:#f0b429;color:#111;font-weight:900;padding:.6rem 1rem;border-radius:.5rem;text-decoration:none}
+nav{display:flex;justify-content:space-between;gap:1rem;margin-bottom:1rem;flex-wrap:wrap}
+section[lang]{display:none}section.on{display:block}
+:focus-visible{outline:3px solid #f0b429;outline-offset:2px}
+</style></head><body><main>
+<nav><a href="./" id="back">← Look Again</a><span><a href="?lang=en" id="toEn">EN</a> · <a href="?lang=zh-Hant" id="toZh" lang="zh-Hant">中文</a></span></nav>
+<section lang="en" id="en">
+<h1>LOOK <b>AGAIN</b></h1>
+<p>Each round shows facts from a real, current FBI poster: year, age, place or FBI field office, reward, and a short excerpt with telling words blacked out. You guess which FBI list the poster is on. Only then do you see the photo and the full poster.</p>
+<p>Many of the people are missing or kidnapped, not suspects. That is the point: you can’t tell who needs help from a face.</p>
+<a class="tip" href="https://tips.fbi.gov/" target="_blank" rel="noopener">Seen someone? Submit a tip at tips.fbi.gov ↗</a>
+<h2>Please keep in mind</h2>
+<ul><li>Charges are allegations. Everyone is presumed innocent until proven guilty.</li>
+<li>Case text is the FBI’s own wording. Descriptions of race, ethnicity and appearance are left out; the official FBI page has the full poster.</li>
+<li>Left out entirely: child-exploitation cases, unidentified remains, homicide and sexual-assault files, cases about a death, and anything graphic.</li>
+<li>If you have urgent information, call 911 or 1-800-CALL-FBI.</li></ul>
+<h2>Data</h2>
+<p>Source: <a href="https://www.fbi.gov/wanted" target="_blank" rel="noopener">FBI Wanted</a>, via the public <a href="https://api.fbi.gov/wanted/v1/list" target="_blank" rel="noopener">FBI Wanted API</a>. Works of the U.S. federal government are in the public domain. This game is not affiliated with or endorsed by the FBI.</p>
+<p>Your browser never contacts FBI servers. Once a day a scheduled job reads the API slowly, saves small copies of new portraits, removes cases the FBI has taken down (for example, people found or arrested), and publishes the result here. <span id="updEn"></span></p>
+</section>
+<section lang="zh-Hant" id="zh">
+<h1>再看<b>一眼</b></h1>
+<p>每一題都來自一張真實、仍在公告中的 FBI 公告：年份、年齡、地點或 FBI 辦公室、懸賞金額，以及一小段塗黑關鍵字的案情摘錄（英文原文）。你要猜這張公告在 FBI 哪一份名單上，答完才會看到照片和完整公告。</p>
+<p>其中有不少人是失蹤或遭綁架的人，而不是嫌疑人。這正是重點：光看一張臉，看不出誰需要幫助。</p>
+<a class="tip" href="https://tips.fbi.gov/" target="_blank" rel="noopener">見過公告上的人？到 tips.fbi.gov 提供線索 ↗</a>
+<h2>請留意</h2>
+<ul><li>起訴內容僅為指控，未經法院定罪前，任何人皆推定無罪。</li>
+<li>案情內容為 FBI 英文原文；遊戲中略去種族、族裔與外貌描述，完整公告請見 FBI 官方頁面。</li>
+<li>完全排除：兒童剝削案件、身分不明遺體、凶殺與性侵檔案、與死亡相關的案件，以及任何血腥內容。</li>
+<li>若有緊急資訊，請撥打 911 或 1-800-CALL-FBI。</li></ul>
+<h2>資料來源</h2>
+<p>來源：<a href="https://www.fbi.gov/wanted" target="_blank" rel="noopener">FBI Wanted</a>，透過公開的 <a href="https://api.fbi.gov/wanted/v1/list" target="_blank" rel="noopener">FBI Wanted API</a> 取得。美國聯邦政府作品屬公有領域。本遊戲與 FBI 無關，亦未獲其背書。</p>
+<p>你的瀏覽器不會連到 FBI 伺服器。系統每天排程一次，慢慢讀取 API、只為新案件存下縮小的照片、移除 FBI 已下架的案件（例如已尋獲或已逮捕），再發布到這裡。<span id="updZh"></span></p>
+</section>
+</main>
+<script>
+const q=new URLSearchParams(location.search).get('lang');let s=null;try{s=JSON.parse(localStorage.getItem('la_lang'))}catch(e){}
+const zh=q?/^zh/i.test(q):s?s==='zh':(navigator.languages||[navigator.language||'']).some(l=>/^zh/i.test(l))&&!/^en/i.test((navigator.languages||[''])[0]);
+document.getElementById(zh?'zh':'en').classList.add('on');document.documentElement.lang=zh?'zh-Hant':'en';
+if(zh){document.title='關於 · 再看一眼 🔎';document.getElementById('back').textContent='← 再看一眼';document.getElementById('back').href='./?lang=zh-Hant'}else document.getElementById('back').href='./?lang=en';
+fetch('cases.json',{cache:'no-cache'}).then(r=>r.json()).then(d=>{const t=d.updated.slice(0,10);document.getElementById('updEn').textContent=`Last refresh: ${t} UTC, ${d.n} cases.`;document.getElementById('updZh').textContent=`最近更新：${t}（UTC），共 ${d.n} 案。`}).catch(()=>{});
+</script></body></html>
