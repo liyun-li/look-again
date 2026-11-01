@@ -8,6 +8,7 @@ import json, re, os, sys, time, html, urllib.request, urllib.error, hashlib, dat
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, 'cases.json')
+CLUES = os.path.join(ROOT, 'clues.json')   # hand-written clue ladders {uid: {"en": [...], "zh": [...]}}
 IMG = os.path.join(ROOT, 'img')
 API = 'https://api.fbi.gov/wanted/v1/list?page=%d&pageSize=50'
 UA = 'Mozilla/5.0 (compatible; look-again-game/1.0; +https://liyun-li.github.io/look-again/)'
@@ -97,6 +98,68 @@ LANG = {'English':'英語','Spanish':'西班牙語','Arabic':'阿拉伯語','Far
  'Serbo-Croatian':'塞爾維亞－克羅埃西亞語','Kurdish':'庫德語','Bulgarian':'保加利亞語','Dari':'達利語','Urdu':'烏爾都語',
  'Ukrainian':'烏克蘭語','Azeri':'亞塞拜然語','Navajo':'納瓦荷語','Japanese':'日語','Hebrew':'希伯來語','Greek':'希臘語','Polish':'波蘭語',
  'Thai':'泰語','Uzbek':'烏茲別克語','Bengali':'孟加拉語','Gujarati':'古吉拉特語','Romanian':'羅馬尼亞語','Hungarian':'匈牙利語'}
+
+
+# ---- clue ladder: short lines, vague -> specific ----
+MAX_CLUES = 5
+ZH_BAD = re.compile(r'她|男子|女子|男性|女性|男人|女人|先生|女士|白人|黑人|亞裔|非裔|拉丁裔|西語裔|膚|髮|鬍|刺青|紋身|身高|體重|眼睛|族裔|種族|原住民')
+EN_PRON = re.compile(r"\b(he|she|him|her|his|hers|himself|herself|man|woman|men|women|boy|girl|son|daughter|wife|husband|mother|father|brother|sister|aunt|uncle|niece|nephew|girlfriend|boyfriend)\b", re.I)
+EN_TITLE = re.compile(r"\b(Mr|Mrs|Ms|Miss)\b\.?(?!-)")
+def _load_hand():
+    try: return json.load(open(CLUES))
+    except Exception: return {}
+HAND = None
+NAME_SKIP = {'first', 'last', 'middle', 'name', 'names', 'unknown', 'aka', 'known', 'also'}
+def _bad_en(e, names):
+    if PHYS.search(e) or EN_PRON.search(e) or EN_TITLE.search(e) or len(e) > 110: return True
+    return any(w.strip(".,'’").lower() in names for w in re.findall(r"[A-Za-z][A-Za-z'’.\-]+", e) if len(w) > 2)
+def hand_clues(c, names):
+    """Hand ladder, minus any line pair (EN+ZH) that fails the safety checks; needs 3+ surviving lines."""
+    global HAND
+    if HAND is None: HAND = _load_hand()
+    h = HAND.get(c['id'])
+    if not h: return None
+    en = [str(x).strip() for x in (h.get('en') or []) if str(x).strip()]
+    zh = [str(x).strip() for x in (h.get('zh') or []) if str(x).strip()]
+    names = set() if c.get('c') == 'seeking' else {n for n in names if n not in NAME_SKIP}
+    keep = [(e, z) for e, z in zip(en, zh) if not _bad_en(e, names) and not ZH_BAD.search(z) and len(z) <= 60]
+    if len(keep) < min(3, len(en)) or len(keep) < 2: return None
+    keep = keep[:MAX_CLUES]
+    return {'en': [e for e, _ in keep], 'zh': [z for _, z in keep]}
+
+def _money_en(n): return '$%s million' % ('%g' % round(n / 1e6, 1)) if n >= 1e6 else '$' + format(n, ',')
+def _money_zh(n):
+    w = n / 1e4
+    if w >= 1e4: return '%g 億美元' % round(w / 1e4, 1)
+    if w >= 1: return '%g 萬美元' % round(w, 1)
+    return '%s 美元' % format(n, ',')
+
+def fallback_clues(k):
+    """Deterministic ladder from the pre-reveal fields (already free of names, race, sex, appearance)."""
+    en, zh = [], []
+    if k.get('y'): en.append('The file goes back to %d.' % k['y']); zh.append('檔案可追溯到 %d 年。' % k['y'])
+    if k.get('age') is not None: en.append('They were about %d at the time.' % k['age']); zh.append('當時大約 %d 歲。' % k['age'])
+    if k.get('lg'): en.append('Speaks %s.' % ', '.join(k['lg'])); zh.append('會說%s。' % '、'.join(k['lgz']))
+    where = k.get('pl') or k.get('of'); wz = k.get('plz') or k.get('ofz')
+    if where: en.append('Where: %s.' % where); zh.append('地點：%s。' % wz)
+    if k.get('oc'): en.append('Work: %s.' % ', '.join(k['oc'])); zh.append('職業（英文原文）：%s。' % ', '.join(k['oc']))
+    en.append('Reward: %s.' % _money_en(k['rw']) if k.get('rw') else 'No reward listed.'); zh.append('懸賞：%s。' % _money_zh(k['rw']) if k.get('rw') else '沒有列出懸賞。')
+    # keep the four vaguest, then the redacted file line as the most specific clue
+    en, zh = en[:MAX_CLUES - 1], zh[:MAX_CLUES - 1]
+    ex = (k.get('ex') or '').replace('Case: ', '')
+    if len(ex) > 150: ex = ex[:150].rsplit(' ', 1)[0].rstrip(',;:') + ' …'
+    if ex: en.append('“%s”' % ex); zh.append('〔英文原文〕“%s”' % ex)
+    return {'en': en, 'zh': zh}
+
+def add_clues(c, names=None):
+    names = names if names is not None else set()
+    h = hand_clues(c, names)
+    c['k']['cl'] = h or fallback_clues(c['k'])
+    c['k']['cs'] = 'h' if h else 'f'
+
+# ONE switch for missing-person cases (FBI "Kidnappings and Missing Persons" / ViCAP missing). The game
+# adapts automatically (daily mix, options, end-screen stats). Env LA_INCLUDE_MISSING=0 overrides for a test run.
+INCLUDE_MISSING = os.environ.get('LA_INCLUDE_MISSING', '1') == '1'
 
 REQ = {'api': 0, 'img': 0}
 MAX_API = 60
@@ -198,14 +261,17 @@ def birth_year(it):
 MONEY = re.compile(r'\$\s?([\d,.]+)\s*(million|billion)?', re.I)
 def reward_amt(it):
     v = it.get('reward_max') or 0
+    if v and re.fullmatch(r'9{4,}', str(int(v))): v = 0   # FBI placeholder (99999 / 999999), not an amount
     best = v if v and v > 0 else 0
+    txt = 0
     for m in MONEY.finditer(it.get('reward_text') or ''):
         try:
             n = float(m.group(1).replace(',', ''))
         except ValueError: continue
         if m.group(2): n *= 1e6 if m.group(2).lower() == 'million' else 1e9
-        best = max(best, n)
-    return int(best)
+        txt = max(txt, n)
+    if txt: best = txt   # the poster's own wording wins over the numeric field
+    return int(best) if not re.fullmatch(r'9{4,}', str(int(best))) else 0
 
 def place_of(it):
     d = text(it.get('description') or '')
@@ -264,6 +330,7 @@ def build(items):
         if (it.get('status') or 'na') != 'na': skip('status'); continue
         b, allb = bucket_of(it)
         if not b: skip('category'); continue
+        if b == 'missing' and not INCLUDE_MISSING: skip('missing-off'); continue
         if EXCLUDE_PATH.search(it.get('url') or ''): skip('path'); continue
         imgs = [i for i in (it.get('images') or []) if i.get('large') or i.get('original')]
         if not imgs: skip('noimage'); continue
@@ -315,8 +382,14 @@ def build(items):
                 'cap': (imgs[0].get('caption') or '').strip() or None,
             },
         }
+        add_clues(c, names)
         cases.append(c)
     return cases, skipped
+
+RES_OK = {'captured', 'surrendered', 'located', 'recovered', 'resolved'}
+def resolved(items):
+    """uid -> status, only where the FBI API itself marks the case resolved (used by the casebook)."""
+    return {it['uid']: it['status'] for it in items if it.get('uid') and (it.get('status') or 'na') in RES_OK}
 
 def cache_images(cases, prev_ids):
     """Download + shrink portraits for NEW cases only; delete images of pruned cases."""
@@ -379,7 +452,7 @@ def main():
     mix = {}
     for c in cases: mix[c['c']] = mix.get(c['c'], 0) + 1
     out = {'updated': datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%MZ'), 'total': total,
-           'n': len(cases), 'mix': mix, 'cases': cases}
+           'n': len(cases), 'mix': mix, 'cfg': {'missing': INCLUDE_MISSING}, 'res': resolved(items), 'cases': cases}
     s = json.dumps(out, ensure_ascii=False, separators=(',', ':'))
     old = open(OUT).read() if os.path.exists(OUT) else ''
     if old:
@@ -394,6 +467,17 @@ def main():
     return 0
 
 if __name__ == '__main__':
+    if '--reclue' in sys.argv:   # re-apply clues.json / fallback to the cached cases.json, no network
+        d = json.load(open(OUT))
+        if not INCLUDE_MISSING: d['cases'] = [c for c in d['cases'] if c['c'] != 'missing']
+        d['cfg'] = {'missing': INCLUDE_MISSING}
+        d['n'] = len(d['cases']); d['mix'] = {}
+        for c in d['cases']: d['mix'][c['c']] = d['mix'].get(c['c'], 0) + 1
+        for c in d['cases']:
+            c['k']['rw'] = reward_amt({'reward_max': c['k'].get('rw') or 0, 'reward_text': c['r'].get('rw') or ''})
+            add_clues(c, names_of({'title': c['title']}))
+        open(OUT, 'w').write(json.dumps(d, ensure_ascii=False, separators=(',', ':')))
+        print('reclued', len(d['cases']), 'hand', sum(c['k']['cs'] == 'h' for c in d['cases'])); sys.exit(0)
     if '--from' in sys.argv:
         items = json.load(open(sys.argv[sys.argv.index('--from') + 1]))
         cases, skipped = build(items)
