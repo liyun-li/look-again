@@ -2,148 +2,188 @@
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Look Again 🔎</title>
-<meta name="description" content="Real FBI case files, names and photos hidden. Read the facts, guess the file, then look again.">
+<meta name="description" content="Real FBI cases, one short clue at a time. Guess the file early for more points. The face comes last.">
 <meta name="theme-color" content="#121519">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23121519'/%3E%3Ccircle cx='14' cy='14' r='7' fill='none' stroke='%23f0b429' stroke-width='3'/%3E%3Cpath d='M19 19l7 7' stroke='%23f0b429' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E">
 <meta property="og:type" content="website"><meta property="og:url" content="https://liyun-li.github.io/look-again/">
-<meta property="og:title" content="Look Again 🔎"><meta property="og:description" content="Real FBI case files. Facts first, photo last. Not everyone on a poster is a suspect.">
+<meta property="og:title" content="Look Again 🔎"><meta property="og:description" content="Real FBI cases, one clue at a time. Call it early, score more. The face comes last.">
 <meta property="og:image" content="https://liyun-li.github.io/look-again/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="Look Again: a redacted FBI case file and a magnifying glass.">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://liyun-li.github.io/look-again/og.png">
 <style>
-:root{--bg:#121519;--bg2:#1b2027;--ink:#eef0f2;--mut:#a9b2bd;--pap:#ece6d6;--pink:#1d1b17;--amb:#f0b429;--grn:#3fb67d;--red:#e0645a;--lnk:#9fd0ff;
+:root{--bg:#121519;--bg2:#1b2027;--ink:#eef0f2;--mut:#a9b2bd;--pap:#ece6d6;--pink:#1d1b17;--amb:#f0b429;--grn:#3fb67d;--red:#e0645a;--lnk:#9fd0ff;--k:1;
 --sans:system-ui,-apple-system,"Segoe UI",Roboto,"PingFang TC","Noto Sans TC","Noto Sans CJK TC","Microsoft JhengHei",sans-serif;
 --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Courier New","PingFang TC","Noto Sans TC","Noto Sans CJK TC",monospace}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;overflow-x:clip}
+html,body{height:100%;overflow:hidden}
 body{background:var(--bg);color:var(--ink);font-family:var(--sans);display:flex;justify-content:center}
 [hidden]{display:none!important}
-.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-.app{width:100%;max-width:34rem;min-width:0;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;
- gap:clamp(.35rem,1.4dvh,.8rem);padding:calc(clamp(.35rem,1.2dvh,.8rem) + env(safe-area-inset-top)) calc(clamp(.5rem,3.5vw,1rem) + env(safe-area-inset-right)) calc(clamp(.35rem,1.2dvh,.8rem) + env(safe-area-inset-bottom)) calc(clamp(.5rem,3.5vw,1rem) + env(safe-area-inset-left))}
-body.ingame .app,body.atend .app{height:100vh;height:100dvh;min-height:0}
-.top{display:flex;flex-wrap:wrap;align-items:center;gap:.3rem .5rem;min-width:0}
-.logo{flex:1 1 auto;min-width:0;font:900 clamp(.8rem,4vw,1.1rem)/1.1 var(--mono);letter-spacing:.08em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.app{width:100%;max-width:34rem;min-width:0;height:100vh;height:100dvh;display:flex;flex-direction:column;
+ gap:clamp(.3rem,1.2dvh,.7rem);padding:calc(clamp(.3rem,1.1dvh,.75rem) + env(safe-area-inset-top)) calc(clamp(.45rem,3.2vw,1rem) + env(safe-area-inset-right)) calc(clamp(.3rem,1.1dvh,.75rem) + env(safe-area-inset-bottom)) calc(clamp(.45rem,3.2vw,1rem) + env(safe-area-inset-left))}
+.top{display:flex;align-items:center;gap:.4rem;min-width:0;flex:none}
+.logo{flex:1 1 0;min-width:0;font:900 clamp(.78rem,4vw,1.1rem)/1.1 var(--mono);letter-spacing:.06em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:none;border:0;text-align:left;color:var(--ink)}
 .logo b{color:var(--amb)}
-.tr{display:flex;gap:.35rem;align-items:center;margin-left:auto;min-width:0}
-.pill{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font:800 clamp(.65rem,3vw,.85rem) var(--mono);border:1px solid #ffffff40;border-radius:999px;padding:.25em .65em}
-.lang{flex:none;display:flex;border:1px solid #ffffff40;border-radius:999px;background:none;overflow:hidden;cursor:pointer;font:800 clamp(.65rem,3vw,.8rem) var(--sans);color:var(--mut);padding:0}
-.lang span{padding:.3em .55em}.lang span.on{background:var(--ink);color:var(--bg)}
+.pill{flex:0 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font:800 clamp(.62rem,3vw,.85rem) var(--mono);border:1px solid #ffffff40;border-radius:999px;padding:.25em .6em}
+.pill:empty{display:none}
+.pill.pop{animation:pop .35s}
+.lang{flex:none;display:flex;border:1px solid #ffffff40;border-radius:999px;background:none;overflow:hidden;cursor:pointer;font:800 clamp(.62rem,3vw,.8rem) var(--sans);color:var(--mut);padding:0}
+.lang span{padding:.3em .5em}.lang span.on{background:var(--ink);color:var(--bg)}
 .bar{height:3px;background:#ffffff1a;border-radius:2px;overflow:hidden;flex:none}.bar>div{height:100%;width:0;background:var(--amb);transition:width .3s}
-button{font:inherit;cursor:pointer;color:inherit}
+button{font:inherit;cursor:pointer;color:inherit;touch-action:manipulation}
 a{color:var(--lnk)}
 :focus-visible{outline:3px solid var(--amb);outline-offset:2px}
-.screen{display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:clamp(.4rem,2dvh,1rem);flex:1 1 auto;min-height:0}
+.screen{display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:clamp(.3rem,1.8dvh,1rem);flex:1 1 0;min-height:0;overflow:hidden}
 .screen.on{display:flex}
-.big{font:900 clamp(2.2rem,min(15vw,10dvh),4.6rem)/.95 var(--mono);letter-spacing:.02em}.big b{color:var(--amb);display:block}
-.sub{color:var(--mut);font-size:clamp(.8rem,min(4vw,2.6dvh),1rem);max-width:26rem;line-height:1.35}
-.how{list-style:none;display:flex;flex-direction:column;gap:clamp(.2rem,1dvh,.5rem);text-align:left;font-size:clamp(.78rem,min(3.9vw,2.5dvh),.95rem);max-width:24rem}
-.how li{display:flex;gap:.6rem;align-items:baseline}.how i{font-style:normal;flex:none;width:1.4em;text-align:center}
-.note{font-size:clamp(.65rem,min(3.2vw,2dvh),.8rem);color:var(--mut);max-width:26rem;line-height:1.35}
-.cta{background:var(--amb);color:#111;border:0;border-radius:.6rem;font-weight:900;font-size:clamp(1.05rem,min(6vw,3.8dvh),1.4rem);padding:clamp(.45rem,1.6dvh,.8rem) clamp(1.6rem,10vw,2.6rem);box-shadow:0 .25rem 0 #0008}
-.cta:active{transform:translateY(2px);box-shadow:0 .1rem 0 #0008}
-.ghost{background:none;border:1px solid #ffffff55;border-radius:.6rem;padding:.45rem 1rem;font-weight:800;font-size:clamp(.8rem,min(4vw,2.6dvh),.95rem)}
-.links{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;font-size:clamp(.65rem,min(3.2vw,2dvh),.8rem)}
-.links a{color:var(--mut)}
+.big{font:900 clamp(1.9rem,min(15vw,9dvh),4.4rem)/.95 var(--mono);letter-spacing:.02em}.big b{color:var(--amb);display:block}
+.sub{color:var(--mut);font-size:clamp(.74rem,min(4vw,2.5dvh),1rem);max-width:24rem;line-height:1.3}
+.modes{display:flex;flex-direction:column;gap:clamp(.3rem,1.3dvh,.6rem);width:min(100%,20rem)}
+.cta{background:var(--amb);color:#111;border:0;border-radius:.65rem;font-weight:900;font-size:clamp(.95rem,min(5.4vw,3.4dvh),1.3rem);padding:clamp(.4rem,1.4dvh,.75rem) 1rem;box-shadow:0 .25rem 0 #0008;line-height:1.15}
+.cta small,.ghost small{display:block;font-weight:700;font-size:.62em;opacity:.8}
+.cta:active,.ghost:active,.opts button:active,.clueb:active,.next:active{transform:translateY(2px) scale(.98);box-shadow:0 .08rem 0 #0008}
+.ghost{background:var(--bg2);border:1px solid #ffffff40;border-radius:.65rem;padding:clamp(.35rem,1.2dvh,.6rem) .9rem;font-weight:800;font-size:clamp(.78rem,min(4vw,2.6dvh),.98rem);line-height:1.15;box-shadow:0 .2rem 0 #0008}
+.note{font-size:clamp(.6rem,min(3vw,1.9dvh),.78rem);color:var(--mut);max-width:26rem;line-height:1.3}
+.links{display:flex;gap:.9rem;flex-wrap:wrap;justify-content:center;font-size:clamp(.62rem,min(3vw,1.9dvh),.8rem)}
+.links a,.links button{color:var(--mut);background:none;border:0;text-decoration:underline}
+.dot{display:inline-block;min-width:1.3em;padding:0 .3em;border-radius:999px;background:var(--red);color:#fff;font-size:.8em;margin-left:.3em}
 /* game */
-#game{display:none;flex-direction:column;gap:clamp(.3rem,1.1dvh,.6rem);flex:1 1 0;min-height:0}
+#game{display:none;flex-direction:column;gap:clamp(.3rem,1dvh,.55rem);flex:1 1 0;min-height:0}
 #game.on{display:flex}
-.card{flex:1 1 0;min-height:0;display:flex;flex-direction:column;background:var(--pap);color:var(--pink);border-radius:.5rem;padding:clamp(.4rem,1.4dvh,.9rem) clamp(.55rem,3vw,1rem);gap:clamp(.25rem,1dvh,.55rem);overflow:hidden;position:relative;box-shadow:0 .3rem 0 #0006}
-.chead{display:flex;justify-content:space-between;align-items:baseline;gap:.5rem;font:800 clamp(.6rem,min(3vw,1.9dvh),.78rem) var(--mono);letter-spacing:.12em;color:#6b6252;border-bottom:1px dashed #0003;padding-bottom:clamp(.15rem,.6dvh,.35rem);flex:none}
-.clues{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,8.5rem),1fr));gap:clamp(.15rem,.7dvh,.4rem) .6rem;flex:none}
-.clue{min-width:0;display:flex;flex-direction:column}
-.clue small{font:700 clamp(.55rem,min(2.7vw,1.7dvh),.7rem) var(--sans);color:#6b6252;letter-spacing:.06em;text-transform:uppercase}
-.clue span{font:800 clamp(.78rem,min(4vw,2.5dvh),1rem)/1.2 var(--mono);overflow-wrap:anywhere}
-.ex{flex:1 1 0;min-height:0;overflow:hidden;font:600 clamp(.74rem,min(3.8vw,2.45dvh),.98rem)/1.38 var(--mono);border-left:3px solid #0002;padding-left:.55rem;position:relative}
-.ex small{display:block;font:700 clamp(.55rem,min(2.7vw,1.7dvh),.7rem) var(--sans);color:#6b6252;letter-spacing:.06em;text-transform:uppercase;margin-bottom:.15em}
-.ex mark{background:#1d1b17;color:#1d1b17;border-radius:2px;padding:0 .1em}
-.ex.clip::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1.4em;background:linear-gradient(transparent,var(--pap))}
-.more{position:absolute;right:.4rem;bottom:.3rem;z-index:2;background:#1d1b17;color:var(--pap);border:0;border-radius:999px;font:800 clamp(.6rem,min(3vw,1.9dvh),.75rem) var(--sans);padding:.3em .7em}
-.q{font-weight:900;font-size:clamp(.85rem,min(4.4vw,2.8dvh),1.1rem);text-align:center;flex:none}
-.opts{display:grid;grid-template-columns:1fr 1fr;gap:clamp(.3rem,1dvh,.55rem);flex:none}
-.opts button{min-width:0;background:var(--bg2);border:1px solid #ffffff38;border-radius:.55rem;padding:clamp(.35rem,1.3dvh,.7rem) .5rem;font-weight:800;font-size:clamp(.74rem,min(3.8vw,2.45dvh),.98rem);line-height:1.2;min-height:clamp(2.4rem,8dvh,3.6rem);overflow-wrap:anywhere;box-shadow:0 .2rem 0 #0008}
-.opts button:active{transform:translateY(2px)}
-.opts button.right{background:#17402c;border-color:var(--grn)}.opts button.wrong{background:#4a1d1a;border-color:var(--red)}
-.opts button[disabled]{cursor:default}.opts button[disabled]:not(.right):not(.wrong){opacity:.45}
+.card{flex:1 1 0;min-height:0;display:flex;flex-direction:column;background:var(--pap);color:var(--pink);border-radius:.55rem;padding:clamp(.35rem,1.3dvh,.85rem) clamp(.5rem,3vw,1rem);gap:clamp(.2rem,.9dvh,.5rem);overflow:hidden;position:relative;box-shadow:0 .3rem 0 #0006}
+.chead{display:flex;justify-content:space-between;align-items:center;gap:.5rem;font:800 clamp(.58rem,min(3vw,1.9dvh),.78rem) var(--mono);letter-spacing:.1em;color:#6b6252;border-bottom:1px dashed #0003;padding-bottom:clamp(.12rem,.5dvh,.3rem);flex:none;min-width:0}
+.chead>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.worth{color:var(--pink);background:var(--amb);border-radius:999px;padding:.1em .55em;letter-spacing:.04em;flex:none}
+.worth.pop{animation:pop .35s}
+.ladder{display:flex;gap:.2rem;flex:none;align-items:center}.ladder i{width:.55em;height:.55em;border-radius:50%;background:#0002;display:block}.ladder i.on{background:var(--pink)}
+.clues{list-style:none;flex:1 1 0;min-height:0;display:flex;flex-direction:column;justify-content:flex-start;gap:calc(var(--k)*clamp(.2rem,.9dvh,.5rem));overflow:hidden}
+.clues li{display:flex;gap:.45em;align-items:baseline;font:700 calc(var(--k)*clamp(.74rem,min(4.1vw,2.6dvh),1.02rem))/1.28 var(--mono);overflow-wrap:anywhere;min-width:0;opacity:.6}
+.clues li b{flex:none;font:900 .72em var(--sans);color:var(--pap);background:#6b6252;border-radius:999px;min-width:1.6em;text-align:center;padding:.1em .3em}
+.clues li.new{opacity:1;font-size:calc(var(--k)*clamp(.82rem,min(4.6vw,2.9dvh),1.15rem));animation:slide .35s cubic-bezier(.2,.9,.3,1.3)}
+.clues li.new b{background:var(--pink)}
+.clues li.last{opacity:1}
+.clues mark{background:#1d1b17;color:#1d1b17;border-radius:2px;padding:0 .1em}
+.clues .en{font-weight:600}
+.clueb{flex:none;align-self:stretch;display:flex;justify-content:center;align-items:center;gap:.5em;background:#1d1b17;color:var(--pap);border:0;border-radius:.5rem;font-weight:900;font-size:clamp(.74rem,min(3.9vw,2.5dvh),.98rem);padding:clamp(.3rem,1.1dvh,.55rem) .6rem;box-shadow:0 .2rem 0 #0006}
+.clueb small{font-weight:700;opacity:.75}
+.clueb[disabled]{background:none;color:#6b6252;box-shadow:none;cursor:default}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:clamp(.3rem,1dvh,.5rem);flex:none}
+.opts button{min-width:0;background:var(--bg2);border:1px solid #ffffff38;border-radius:.6rem;padding:clamp(.3rem,1.2dvh,.65rem) .4rem;font-weight:800;font-size:clamp(.72rem,min(3.8vw,2.45dvh),.98rem);line-height:1.2;min-height:clamp(2.3rem,7.5dvh,3.4rem);overflow-wrap:anywhere;box-shadow:0 .2rem 0 #0008;transition:transform .08s}
+.opts button:last-child:nth-child(odd){grid-column:1/-1}
+.opts button.right{background:#17402c;border-color:var(--grn);animation:pop .4s}.opts button.wrong{background:#4a1d1a;border-color:var(--red);animation:shake .35s}
+.opts button[disabled]{cursor:default}.opts button[disabled]:not(.right):not(.wrong){opacity:.4}
 .loading{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.6rem;font:800 .9rem var(--mono);color:#6b6252}
 /* reveal */
-.rv{display:none;flex:1 1 0;min-height:0;gap:clamp(.25rem,1dvh,.5rem);flex-direction:column}
+.rv{display:none;flex:1 1 0;min-height:0;gap:clamp(.2rem,.9dvh,.45rem);flex-direction:column}
 #game .ask{display:contents}#game.done .rv{display:flex}#game.done .ask,#game.wait .ask,#game.wait .rv{display:none}
 .rtop{display:flex;gap:clamp(.45rem,2.5vw,.8rem);min-height:0;flex:1 1 0}
-.pic{flex:none;height:100%;max-height:clamp(5rem,30dvh,15rem);aspect-ratio:4/5;background:#d9d1bd;border-radius:.35rem;overflow:hidden;display:flex;align-items:center;justify-content:center;font:700 .7rem var(--sans);color:#6b6252;text-align:center}
+.pic{flex:none;height:100%;max-height:clamp(5rem,32dvh,16rem);aspect-ratio:4/5;background:#d9d1bd;border-radius:.35rem;overflow:hidden;display:flex;align-items:center;justify-content:center;font:700 .7rem var(--sans);color:#6b6252;text-align:center;position:relative}
+#game.done .pic{animation:flip .5s cubic-bezier(.2,.9,.3,1.2)}
 .pic img{width:100%;height:100%;object-fit:cover;display:block}
-.rinfo{min-width:0;flex:1 1 0;display:flex;flex-direction:column;gap:clamp(.1rem,.5dvh,.3rem);overflow:hidden}
-.verdict{font:900 clamp(.95rem,min(5vw,3.2dvh),1.3rem) var(--sans)}.verdict.ok{color:#1f7a4f}.verdict.no{color:#a23a31}
-.rname{font:900 clamp(.8rem,min(4vw,2.6dvh),1.05rem)/1.15 var(--mono);overflow-wrap:anywhere}
-.rcat{font-weight:800;font-size:clamp(.72rem,min(3.6vw,2.3dvh),.92rem)}
-.rd{font-size:clamp(.66rem,min(3.3vw,2.1dvh),.85rem);color:#4b453a;line-height:1.3;overflow:hidden;flex:1 1 0;min-height:0}
-.legal{font-size:clamp(.58rem,min(2.9vw,1.8dvh),.74rem);color:#5e5646;flex:none;line-height:1.3}
-.racts{display:flex;flex-wrap:wrap;gap:.35rem;flex:none}
-.racts a,.racts button{flex:1 1 auto;text-align:center;text-decoration:none;font-weight:800;font-size:clamp(.66rem,min(3.3vw,2.1dvh),.84rem);border-radius:.45rem;padding:clamp(.3rem,1dvh,.5rem) .5rem;border:1px solid #0004;background:none;color:#1d1b17}
+.stamp{position:absolute;left:50%;bottom:6%;transform:translateX(-50%) rotate(-8deg);font:900 clamp(.8rem,min(5vw,3.2dvh),1.2rem) var(--mono);border:3px solid currentColor;border-radius:.3rem;padding:.05em .35em;background:#ece6d6e6;white-space:nowrap}
+.stamp.ok{color:#1f7a4f}.stamp.no{color:#a23a31}
+#game.done .stamp{animation:stamp .45s .25s both cubic-bezier(.2,.9,.3,1.4)}
+.rinfo{min-width:0;flex:1 1 0;display:flex;flex-direction:column;gap:clamp(.08rem,.45dvh,.28rem);overflow:hidden}
+.verdict{font:900 clamp(.9rem,min(5vw,3.1dvh),1.3rem) var(--sans)}.verdict.ok{color:#1f7a4f}.verdict.no{color:#a23a31}
+.rname{font:900 clamp(.76rem,min(4vw,2.5dvh),1.05rem)/1.15 var(--mono);overflow-wrap:anywhere}
+.rcat{font-weight:800;font-size:clamp(.7rem,min(3.6vw,2.3dvh),.92rem)}
+.badge{display:inline-block;background:#1d1b17;color:var(--amb);border-radius:.25rem;font:800 .72em var(--sans);padding:.05em .4em;margin-top:.1em}
+.rd{font-size:clamp(.64rem,min(3.3vw,2.1dvh),.85rem);color:#4b453a;line-height:1.3;overflow:hidden;flex:1 1 0;min-height:0}
+.legal{font-size:clamp(.56rem,min(2.9vw,1.8dvh),.74rem);color:#5e5646;flex:none;line-height:1.25}
+.racts{display:flex;flex-wrap:wrap;gap:.3rem;flex:none}
+.racts a,.racts button{flex:1 1 auto;text-align:center;text-decoration:none;font-weight:800;font-size:clamp(.64rem,min(3.3vw,2.1dvh),.84rem);border-radius:.45rem;padding:clamp(.28rem,.9dvh,.5rem) .45rem;border:1px solid #0004;background:none;color:#1d1b17}
 .racts .tip{background:#1d1b17;color:var(--amb);border-color:#1d1b17;flex-basis:100%}
-.next{flex:none;background:var(--ink);color:var(--bg);border:0;border-radius:.6rem;font-weight:900;font-size:clamp(1rem,min(5.4vw,3.4dvh),1.25rem);padding:clamp(.4rem,1.5dvh,.75rem)}
+.next{flex:none;background:var(--ink);color:var(--bg);border:0;border-radius:.6rem;font-weight:900;font-size:clamp(.95rem,min(5.2vw,3.3dvh),1.25rem);padding:clamp(.38rem,1.4dvh,.7rem);box-shadow:0 .2rem 0 #0008}
 #game:not(.done) .next{display:none}
 /* end */
-.score{font:900 clamp(2.6rem,min(20vw,12dvh),5rem)/1 var(--mono)}
-.rank{font-weight:900;color:var(--amb);font-size:clamp(1rem,min(5.5vw,3.4dvh),1.4rem)}
-.grid{font-size:clamp(1rem,min(5.5vw,3.4dvh),1.4rem);letter-spacing:.1em}
-.take{background:var(--bg2);border-radius:.6rem;padding:clamp(.3rem,1.3dvh,.8rem) .8rem;max-width:26rem;font-size:clamp(.7rem,min(3.7vw,2.3dvh),.95rem);line-height:1.35;text-align:left}
-.take p+p{margin-top:.35em}.take b{color:var(--amb)}
+#end{gap:clamp(.2rem,1.3dvh,.8rem)}
+.score{font:900 clamp(2rem,min(16vw,9dvh),4.4rem)/1 var(--mono)}
+.score small{font-size:.45em;color:var(--mut)}
+.rank{font-weight:900;color:var(--amb);font-size:clamp(.9rem,min(5vw,3dvh),1.35rem)}
+.grid{font-size:clamp(.8rem,min(4.4vw,2.8dvh),1.2rem);display:flex;flex-wrap:wrap;justify-content:center;gap:.15em .6em;line-height:1.1}
+.streak{font-weight:800;font-size:clamp(.72rem,min(3.8vw,2.4dvh),.95rem);color:var(--mut)}
 .row{display:flex;gap:.4rem;flex-wrap:wrap;justify-content:center;align-items:center}
-#end{gap:clamp(.25rem,1.5dvh,.9rem)}#end .cta{font-size:clamp(.9rem,min(5vw,3.2dvh),1.3rem);padding:clamp(.35rem,1.3dvh,.7rem) clamp(1rem,6vw,2rem)}
+#end .cta{padding:clamp(.32rem,1.2dvh,.65rem) clamp(1rem,6vw,2rem)}
+.help{width:100%;max-width:26rem;background:var(--bg2);border-radius:.6rem;padding:clamp(.3rem,1.1dvh,.65rem) .6rem;display:flex;flex-direction:column;gap:clamp(.2rem,.8dvh,.45rem);min-height:0;flex:0 1 auto;overflow:hidden}
+.help>*{flex:none}
+.help h2{font:900 clamp(.72rem,min(3.8vw,2.4dvh),.95rem) var(--sans);color:var(--amb)}
+.help p{font-size:clamp(.58rem,min(3vw,1.85dvh),.76rem);color:var(--mut);line-height:1.25}
+.hf{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:minmax(0,1fr);gap:.45rem;min-height:0;flex:0 1 auto!important}
+.hfc{display:flex;flex-direction:column;align-items:stretch;gap:.15rem;min-width:0;min-height:0;height:100%;font-size:clamp(.56rem,min(2.9vw,1.8dvh),.74rem);line-height:1.15}
+.hfc>*{flex:none}
+.hfc>a:first-child{flex:0 1 auto;min-height:0;display:block;max-height:clamp(3rem,16dvh,9rem);overflow:hidden;border-radius:.3rem}
+.hfc img{width:100%;height:100%;min-height:0;aspect-ratio:4/5;object-fit:cover;object-position:50% 25%;background:#2a313a;display:block}
+.hfc .n{font-weight:800;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-decoration:none}
+.hfc .m{color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hfc .t{font-weight:900;color:var(--amb);text-decoration:none;border:1px solid #f0b42966;border-radius:.3rem;padding:.3em 0;text-align:center;min-height:1.5rem;display:flex;align-items:center;justify-content:center}
 .toast:empty{display:none}
-.toast{min-height:1.2em;font-weight:800;color:var(--amb);font-size:.85rem}
+.toast{font-weight:800;color:var(--amb);font-size:.85rem;white-space:pre-line}
 /* dialog */
 dialog{margin:auto;width:min(100% - 1.2rem,34rem);max-height:calc(100dvh - 1.2rem);border:0;border-radius:.6rem;background:var(--pap);color:var(--pink);padding:0;overflow:hidden}
 dialog::backdrop{background:#000b}
-dialog[open]{display:flex;flex-direction:column}
+dialog[open]{display:flex;flex-direction:column;animation:pop .25s}
 .dh{display:flex;justify-content:space-between;align-items:center;gap:.5rem;padding:.6rem .9rem;border-bottom:1px solid #0002;flex:none}
 .dh h2{font:900 1rem var(--mono);min-width:0;overflow-wrap:anywhere}
 .x{flex:none;width:2.6rem;height:2.6rem;border-radius:50%;border:0;background:#1d1b17;color:var(--pap);font-size:1.1rem}
 .db{overflow-y:auto;overscroll-behavior:contain;padding:.8rem .9rem 1rem;font-size:.9rem;line-height:1.45;display:flex;flex-direction:column;gap:.55rem}
 .db h3{font:800 .72rem var(--sans);letter-spacing:.08em;text-transform:uppercase;color:#6b6252;margin-top:.3rem}
 .db .w{font-weight:900;color:#a23a31}
-.db ul{list-style:none;display:flex;flex-direction:column;gap:.5rem}.db li{display:flex;gap:.6rem;align-items:center}
-.db li img{width:2.6rem;height:3.25rem;object-fit:cover;border-radius:.25rem;flex:none;background:#d9d1bd}
+.db ul{list-style:none;display:flex;flex-direction:column;gap:.55rem}.db li{display:flex;gap:.6rem;align-items:center}
+.db li img,.db li .ph{width:2.6rem;height:3.25rem;object-fit:cover;border-radius:.25rem;flex:none;background:#d9d1bd;display:flex;align-items:center;justify-content:center}
+.db li>div{min-width:0;overflow-wrap:anywhere}
 .db a{color:#0b5aa6}
-
+.db .closed{display:inline-block;background:#1d1b17;color:var(--amb);font-weight:800;font-size:.78em;border-radius:.25rem;padding:.05em .4em}
+.db .open{color:#6b6252;font-size:.82em}
 .side{display:contents}
-@media (min-width:700px){.opts button{min-height:3.4rem}}
+@media (min-width:700px){.opts button{min-height:3.3rem}}
 @media (orientation:landscape) and (max-height:559px){
- #game.on{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;gap:.4rem .8rem}
+ #game.on{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;gap:.4rem .8rem}
  .card{grid-row:1/3}
- #game .q{display:none}.opts{grid-template-columns:1fr;align-content:center}
+ .opts{grid-template-columns:1fr;align-content:center}
  .opts button{min-height:0}
- #game:not(.done) .side{display:flex}
- .side{display:flex;flex-direction:column;gap:.4rem;justify-content:center;min-height:0}
+ .opts button:last-child:nth-child(odd){grid-column:auto}
+ .side{display:flex;flex-direction:column;gap:.35rem;justify-content:center;min-height:0}
+ 
+ #end{display:none}#end.on{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);grid-auto-flow:dense;align-content:center;column-gap:1rem}
+ #end>*{grid-column:1}#end>.help{grid-column:2;grid-row:1/span 6}
  .foot{display:none}
 }
-
-.foot{font-size:.62rem;color:var(--mut);text-align:center;flex:none}.foot a{color:var(--mut)}
+.foot{font-size:.6rem;color:var(--mut);text-align:center;flex:none}.foot a{color:var(--mut)}
 body.ingame .foot,body.atend .foot{display:none}
-@media (max-height:430px){#start .how,#end .grid{display:none}#end .take p:nth-child(3){display:none}}
+@media (max-height:430px){#start .note.legal2{display:none}.help p{display:none}}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.08)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+@keyframes slide{from{opacity:0;transform:translateY(.6em)}to{opacity:1;transform:none}}
+@keyframes flip{from{opacity:0;transform:perspective(40rem) rotateY(80deg) scale(.85)}to{opacity:1;transform:none}}
+@keyframes stamp{from{opacity:0;transform:translateX(-50%) rotate(-8deg) scale(2.4)}to{opacity:1;transform:translateX(-50%) rotate(-8deg) scale(1)}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
-</style></head><body><main class="app">
-<header class="top"><h1 class="logo" id="logo">LOOK <b>AGAIN</b></h1><div class="tr"><div class="pill" id="hud" aria-live="off">0/10 · ✓0</div><button class="lang" id="langBtn" type="button" aria-label="Language / 語言"><span id="lEn" lang="en">EN</span><span id="lZh" lang="zh-Hant">中</span></button></div></header>
+
+#game.done .opts{display:none}
+.iconb{padding-inline:.7rem}
+
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style></head><body>
+<main class="app">
+<header class="top"><button class="logo" id="logo" type="button" aria-label="Home">LOOK <b>AGAIN</b></button><div class="pill" id="hud" aria-live="off"></div><button class="lang" id="langBtn" type="button" aria-label="Language / 語言"><span id="lEn" lang="en">EN</span><span id="lZh" lang="zh-Hant">中</span></button></header>
 <div class="bar" aria-hidden="true"><div id="prog"></div></div>
 
 <section class="screen on" id="start">
- <div class="big" id="sTitle">LOOK<b>AGAIN</b></div>
+ <h1 class="big" id="sTitle">LOOK<b>AGAIN</b></h1>
  <p class="sub" data-t="tag"></p>
- <ul class="how"><li><i>🗂️</i><span data-t="h1"></span></li><li><i>❓</i><span data-t="h2"></span></li><li><i>🖼️</i><span data-t="h3"></span></li></ul>
- <button class="cta" id="goBtn" type="button" data-t="start"></button>
- <button class="ghost" id="resumeBtn" type="button" hidden data-t="resume"></button>
- <p class="note" data-t="legal"></p>
+ <div class="modes">
+  <button class="cta" id="dailyBtn" type="button"></button>
+  <button class="ghost" id="endlessBtn" type="button"></button>
+  <button class="ghost" id="bookBtn" type="button"></button>
+ </div>
+ <p class="note legal2" data-t="legal"></p>
  <p class="note" id="upd"></p>
  <div class="links"><a href="about.html" id="aboutLink" data-t="about"></a><a href="https://tips.fbi.gov/" target="_blank" rel="noopener" data-t="tipline"></a></div>
 </section>
 
 <section id="game" aria-labelledby="qText">
  <div class="card" id="card">
-  <div class="chead"><span id="caseNo"></span><span id="caseYr"></span></div>
-  <div class="loading" id="loading" hidden><span data-t="loading"></span><button class="ghost" id="retryBtn" type="button" hidden data-t="retry" style="color:#1d1b17;border-color:#0005"></button></div>
+  <div class="chead"><span id="caseNo"></span><span class="ladder" id="ladder" aria-hidden="true"></span><span class="worth" id="worth"></span></div>
+  <div class="loading" id="loading" hidden><span data-t="loading"></span><button class="ghost" id="retryBtn" type="button" hidden data-t="retry"></button></div>
   <div class="ask">
-   <div class="clues" id="clues"></div>
-   <div class="ex" id="ex"></div>
+   <ol class="clues" id="clues" aria-live="polite"></ol>
+   <button class="clueb" id="clueBtn" type="button"></button>
   </div>
   <div class="rv" id="rv" aria-live="polite">
    <div class="rtop"><div class="pic" id="pic"></div>
@@ -153,19 +193,20 @@ body.ingame .foot,body.atend .foot{display:none}
   </div>
  </div>
  <div class="side">
-  <h2 class="q" id="qText" data-t="q"></h2>
+  <h2 class="sr" id="qText" data-t="q"></h2>
   <div class="opts" id="opts" role="group" aria-labelledby="qText"></div>
+  <button class="next" id="next" type="button" data-t="next"></button>
  </div>
- <button class="next" id="next" type="button" data-t="next"></button>
 </section>
 
 <section class="screen" id="end" aria-labelledby="score">
  <div class="score" id="score"></div>
  <div class="rank" id="rank"></div>
  <div class="grid" id="grid" aria-hidden="true"></div>
- <div class="take" id="take"></div>
- <div class="row"><button class="cta" id="shareBtn" type="button" data-t="share"></button><button class="ghost" id="againBtn" type="button" data-t="again"></button><button class="ghost" id="metBtn" type="button" data-t="met"></button></div>
+ <div class="streak" id="streak"></div>
+ <div class="row"><button class="cta" id="shareBtn" type="button" data-t="share"></button><button class="ghost" id="againBtn" type="button"></button><button class="ghost iconb" id="book2Btn" type="button" aria-label="Casebook">📒</button></div>
  <div class="toast" id="toast" role="status"></div>
+ <section class="help" id="help" aria-labelledby="helpT"><h2 id="helpT" data-t="helpT"></h2><p data-t="helpP"></p><div class="hf" id="hf"></div></section>
 </section>
 <p class="foot"><span data-t="foot"></span> · <a href="about.html" data-t="about"></a></p>
 </main>
@@ -174,205 +215,288 @@ body.ingame .foot,body.atend .foot{display:none}
 
 <script>
 "use strict";
-const ROUNDS=10,MISS_MIN=3;
+const PTS=[5,3,2,1,1],LIVES=3,DOCKET=5,EPOCH=Date.UTC(2026,10,2);
+// FBI list -> broad game category. Missing, parental-kidnapping and seeking-information files are never scored.
+const GMAP={cyber:'cyber',spy:'spy',terror:'terror',money:'money',violent:'violent',gangs:'violent',topten:'violent'};
+const GROUPS=['cyber','spy','terror','money','violent'];
 const CAT={
- missing:{en:"Kidnapped or missing",zh:"綁架與失蹤人口",crime:false},
- parental:{en:"Parental kidnapping",zh:"父母擄童",crime:true},
- topten:{en:"Ten Most Wanted",zh:"十大通緝要犯",crime:true},
- violent:{en:"Violent crime",zh:"暴力犯罪",crime:true},
- gangs:{en:"Gangs & drug rings",zh:"幫派與毒品集團",crime:true},
- money:{en:"Fraud & white-collar",zh:"詐欺與白領犯罪",crime:true},
- cyber:{en:"Cyber crime",zh:"網路犯罪",crime:true},
- spy:{en:"Spying & national security",zh:"間諜與國安",crime:true},
- terror:{en:"Terrorism",zh:"恐怖主義",crime:true},
- seeking:{en:"Seeking information",zh:"徵求破案線索",crime:true}
+ cyber:{en:"💻 Hacking & cyber",zh:"💻 駭客與網路犯罪"},
+ spy:{en:"🕵️ Spying & national security",zh:"🕵️ 間諜與國家安全"},
+ terror:{en:"💣 Terrorism",zh:"💣 恐怖主義"},
+ money:{en:"💰 Money crimes",zh:"💰 金錢犯罪"},
+ violent:{en:"🚨 Violent & gang crime",zh:"🚨 暴力與幫派犯罪"}
 };
+const LIST={topten:{en:"⭐ FBI Ten Most Wanted",zh:"⭐ FBI 十大通緝要犯"},gangs:{en:"Criminal enterprises",zh:"犯罪集團"},violent:{en:"Violent crime",zh:"暴力犯罪"},
+ cyber:{en:"Cyber’s Most Wanted",zh:"網路犯罪通緝"},spy:{en:"Counterintelligence",zh:"反情報"},terror:{en:"Terrorism",zh:"恐怖主義"},money:{en:"White-collar crime",zh:"白領犯罪"}};
 const S={en:{
- tag:"Real FBI case files. Names and photos hidden. Read the facts, pick the file, then look again.",
- h1:"Read the clues from a real FBI poster",h2:"Pick which FBI list it’s on",h3:"Then see the face, and the full story",
- start:"START",resume:"RESUME",loading:"Opening the file…",retry:"RETRY",loadFail:"Couldn’t load the case files.",
+ tag:"Real FBI cases, one clue at a time. Call it early for more points. The face comes last.",
+ daily:n=>`TODAY’S DOCKET #${n}<small>5 cases · same for everyone</small>`,
+ dailyRes:(n,i)=>`RESUME DOCKET #${n}<small>case ${i+1} of 5</small>`,
+ dailyDone:(n,p)=>`✓ DOCKET #${n} · ${p} PTS<small>See results · new docket tomorrow</small>`,
+ endless:b=>`♾️ ENDLESS<small>3 strikes${b?` · best ${b}`:''}</small>`,
+ bookB:n=>`📒 Casebook${n?` (${n})`:''}`,
+ loading:"Opening the file…",retry:"RETRY",loadFail:"Couldn’t load the case files.",
  legal:"Charges are allegations. Everyone is presumed innocent until proven guilty.",
  about:"About & data",tipline:"FBI tip line",updated:(d,n)=>`FBI data refreshed ${d} · ${n} cases`,
- q:"Which FBI file is this?",case:(i,n)=>`CASE ${i}/${n}`,
- year:"Year",age:"Age then",office:"FBI office",place:"Place",reward:"Reward",speaks:"Speaks",work:"Work",ex:"From the file",noRw:"None listed",
- more:"More",right:"✓ Right",wrong:"✗ Not quite",was:"File:",
+ q:"Which kind of case is this?",caseD:(i,n)=>`CASE ${i}/${n}`,caseE:i=>`CASE ${i}`,
+ worth:p=>`+${p}`,more:p=>`🔎 Another clue <small>→ worth +${p}</small>`,last:"Last clue. Make the call!",
+ right:p=>`✓ Cracked it! +${p}`,wrong:"✗ Not this time",was:"It was",onList:"On the list:",
  tip:"Seen them? Submit a tip ↗",full:"Full poster",fbi:"FBI page ↗",next:"NEXT →",finish:"RESULTS →",
- lgWanted:"Charges are allegations. Presumed innocent until proven guilty.",lgMissing:"Someone is still looking for them. If you know anything, tell the FBI.",lgSeek:"The FBI is asking the public for help identifying the people involved.",
- noPic:"Photo unavailable",enNote:"",
- share:"SHARE",met:"Who you met",again:"PLAY AGAIN",copied:"Copied!",
+ lgWanted:"Charges are allegations. Presumed innocent until proven guilty.",
+ noPic:"Photo unavailable",enNote:"FBI wording:",
+ share:"SHARE",again:"PLAY AGAIN",endless2:"♾️ ENDLESS",book:"📒 Casebook",copied:"Copied!",
  foot:"Data: FBI Wanted (public domain)",
- rank:[ "Keep looking", "Sharp reader", "Careful eye", "Case closed"],
- t1:(m,n)=>`<b>${m} of ${n}</b> people you read about were missing or kidnapped — not suspects.`,
- t2:(k,m)=>`You filed <b>${k}</b> of those ${m} under a crime.`,
- t2ok:m=>m?`You didn’t file any of them under a crime.`:``,
- t3:"A photo can’t tell you who needs help and who’s on the run. Look again.",
- sh:(s,n,m,N)=>`Look Again 🔎 ${s}/${n}\n${m} of ${N} weren’t suspects — they were missing.`,
- metT:"Who you met",fullFiled:"FBI list",fullDesc:"Poster",fullText:"Details (FBI wording)",fullRm:"Remarks",fullRw:"Reward",fullW:"Warning",
- cutNote:"Descriptions of appearance are left out here. The FBI page has the full poster."
+ rank:["Rookie","Gumshoe","Sharp eye","Special agent","Case cracker"],
+ streak:n=>`🔥 ${n}-day streak · new docket tomorrow`,
+ endlessRes:(c,b)=>`${c} cases · best ${b}`,newBest:"🏆 New best!",
+ sh:(n,p,mx)=>`Look Again 🔎 Docket #${n} · ${p}/${mx}`,shE:(p,c)=>`Look Again 🔎 Endless · ${p} pts in ${c} cases`,shStreak:n=>`🔥 ${n}-day streak`,
+ helpT:"💛 Help find them",helpP:"Not a game. These people are missing; if you know anything, tell the FBI.",since:y=>`Missing since ${y}`,tipS:"Tip ↗",
+ bookT:"📒 Casebook",bookEmpty:"Cases you play show up here. Come back later: when the FBI takes a poster down, you’ll see it here.",
+ bookIntro:(n,k)=>`${n} cases played · ${k} closed`,
+ closed:"Case closed: no longer on the FBI list",closedWhy:"The FBI took this poster down. That can mean an arrest, a resolution, or another reason; the FBI doesn’t always say.",
+ stillOpen:"Still on the FBI list",played:d=>`played ${d}`,
+ fullFiled:"FBI list",fullDesc:"Poster",fullText:"Details (FBI wording)",fullRm:"Remarks",fullRw:"Reward",fullW:"Warning",
+ cutNote:"Descriptions of appearance are left out here. The FBI page has the full poster.",
+ h:{when:(y,a)=>y&&a!=null?`🗓️ It starts in ${y}. They were about ${a}.`:y?`🗓️ It starts in ${y}.`:`🗓️ They were about ${a} at the time.`,
+  office:o=>`📍 The FBI’s ${o} office has the case.`,place:p=>`📍 Place: ${p}`,
+  rw:r=>r?`💵 Reward: up to ${r}.`:`💵 No reward listed.`,lang:l=>`🗣️ Speaks ${l}.`,work:w=>`💼 Has worked as: ${w}`,ex:e=>`📄 “${e}”`}
 },zh:{
- tag:"真實 FBI 案件檔案，隱去姓名和照片。讀線索、猜檔案，再看一眼。",
- h1:"讀一張真實 FBI 公告上的線索",h2:"猜它在 FBI 哪一份名單上",h3:"最後才看到臉和完整案情",
- start:"開始",resume:"繼續上次",loading:"調閱檔案中…",retry:"重試",loadFail:"案件資料載入失敗。",
+ tag:"真實 FBI 案件，一次一條線索。越早猜，分數越高。照片最後才揭曉。",
+ daily:n=>`今日案卷 #${n}<small>5 個案件・大家都一樣</small>`,
+ dailyRes:(n,i)=>`繼續案卷 #${n}<small>第 ${i+1} / 5 案</small>`,
+ dailyDone:(n,p)=>`✓ 案卷 #${n}・${p} 分<small>看結果・明天有新案卷</small>`,
+ endless:b=>`♾️ 無盡模式<small>三振出局${b?`・最佳 ${b} 分`:''}</small>`,
+ bookB:n=>`📒 辦案筆記${n?`（${n}）`:''}`,
+ loading:"調閱檔案中…",retry:"重試",loadFail:"案件資料載入失敗。",
  legal:"起訴內容僅為指控，未經法院定罪前，任何人皆推定無罪。",
  about:"關於與資料來源",tipline:"FBI 線索專線",updated:(d,n)=>`FBI 資料更新於 ${d}・共 ${n} 案`,
- q:"這是 FBI 哪一類檔案？",case:(i,n)=>`案件 ${i}/${n}`,
- year:"年份",age:"當時年齡",office:"FBI 辦公室",place:"地點",reward:"懸賞",speaks:"語言",work:"職業",ex:"檔案摘錄（英文原文）",noRw:"未列出",
- more:"展開",right:"✓ 答對了",wrong:"✗ 不是喔",was:"檔案：",
- tip:"見過這個人？向 FBI 提供線索 ↗",full:"完整公告",fbi:"FBI 官方頁面 ↗",next:"下一題 →",finish:"看結果 →",
- lgWanted:"起訴內容僅為指控，未經定罪前推定無罪。",lgMissing:"仍有人在找他們。若你知道任何消息，請告訴 FBI。",lgSeek:"FBI 正向大眾徵求線索，以查出相關人士身分。",
- noPic:"照片無法顯示",enNote:"以下為 FBI 英文原文",
- share:"分享",met:"這局遇到的人",again:"再玩一次",copied:"已複製！",
+ q:"這是哪一類案件？",caseD:(i,n)=>`案件 ${i}/${n}`,caseE:i=>`案件 ${i}`,
+ worth:p=>`+${p}`,more:p=>`🔎 再給一條線索 <small>→ 剩 +${p}</small>`,last:"最後一條線索了，快下判斷！",
+ right:p=>`✓ 破案！+${p}`,wrong:"✗ 這次沒猜中",was:"答案是",onList:"所屬名單：",
+ tip:"見過這個人？向 FBI 提供線索 ↗",full:"完整公告",fbi:"FBI 官方頁面 ↗",next:"下一案 →",finish:"看結果 →",
+ lgWanted:"起訴內容僅為指控，未經定罪前推定無罪。",
+ noPic:"照片無法顯示",enNote:"FBI 英文原文：",
+ share:"分享",again:"再玩一次",endless2:"♾️ 無盡模式",book:"📒 辦案筆記",copied:"已複製！",
  foot:"資料：FBI Wanted（公有領域）",
- rank:["再多看幾眼","讀得很仔細","眼光很準","全數結案"],
- t1:(m,n)=>`這局的 ${n} 個人裡，<b>${m} 位</b>是失蹤或遭綁架的人，不是嫌疑人。`,
- t2:(k,m)=>`其中有 <b>${k}</b> 位被你歸到了犯罪類別。`,
- t2ok:m=>m?`你沒有把他們任何一位歸到犯罪類別。`:``,
- t3:"照片看不出誰需要幫助、誰在逃亡。再看一眼。",
- sh:(s,n,m,N)=>`再看一眼 🔎 ${s}/${n}\n${N} 個人裡有 ${m} 位不是嫌疑人，而是失蹤的人。`,
- metT:"這局遇到的人",fullFiled:"FBI 名單",fullDesc:"公告",fullText:"案情（FBI 英文原文）",fullRm:"備註",fullRw:"懸賞",fullW:"警告",
- cutNote:"此處略去外貌描述；完整公告請見 FBI 官方頁面。"
+ rank:["菜鳥","跑腿偵探","眼光銳利","特別探員","破案高手"],
+ streak:n=>`🔥 連續 ${n} 天・明天有新案卷`,
+ endlessRes:(c,b)=>`${c} 個案件・最佳 ${b} 分`,newBest:"🏆 新紀錄！",
+ sh:(n,p,mx)=>`再看一眼 🔎 案卷 #${n}・${p}/${mx}`,shE:(p,c)=>`再看一眼 🔎 無盡模式・${c} 案 ${p} 分`,shStreak:n=>`🔥 連續 ${n} 天`,
+ helpT:"💛 幫忙找到他們",helpP:"這不是遊戲。這些人仍下落不明，若你知道任何消息，請告訴 FBI。",since:y=>`${y} 年起失蹤`,tipS:"提供線索 ↗",
+ bookT:"📒 辦案筆記",bookEmpty:"玩過的案件會出現在這裡。之後再回來看看：FBI 撤下公告時，這裡會告訴你。",
+ bookIntro:(n,k)=>`玩過 ${n} 案・${k} 案已結`,
+ closed:"已結案：已不在 FBI 名單上",closedWhy:"FBI 已撤下這張公告。可能是已逮捕、已解決或其他原因，FBI 不一定會說明。",
+ stillOpen:"仍在 FBI 名單上",played:d=>`${d} 玩過`,
+ fullFiled:"FBI 名單",fullDesc:"公告",fullText:"案情（FBI 英文原文）",fullRm:"備註",fullRw:"懸賞",fullW:"警告",
+ cutNote:"此處略去外貌描述；完整公告請見 FBI 官方頁面。",
+ h:{when:(y,a)=>y&&a!=null?`🗓️ 事情從 ${y} 年開始，當時對方約 ${a} 歲。`:y?`🗓️ 事情從 ${y} 年開始。`:`🗓️ 當時對方約 ${a} 歲。`,
+  office:o=>`📍 由 FBI ${o}辦公室負責。`,place:p=>`📍 地點：${p}`,
+  rw:r=>r?`💵 懸賞最高 ${r}。`:`💵 沒有列出懸賞。`,lang:l=>`🗣️ 會說${l}。`,work:w=>`💼 曾從事：${w}`,ex:e=>`📄 檔案原文：「${e}」`}
 }};
 const $=id=>document.getElementById(id);
 const LS={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
 let L=(()=>{const q=new URLSearchParams(location.search).get('lang');if(q)return /^zh/i.test(q)?'zh':'en';const s=LS.get('la_lang');if(s)return s;
  const ls=navigator.languages||[navigator.language||'en'];for(const l of ls){if(/^zh/i.test(l))return 'zh';if(/^en/i.test(l))return 'en'}return 'en'})();
 const T=k=>S[L][k];
-let DATA=null,BY={},run=null;
+let DATA=null,BYID={},POOL={},MISSING=[],CLUES={en:null,zh:null},CLOSED={},run=null,lastEnd=null;
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c])}
-function applyLang(){
- document.documentElement.lang=L==='zh'?'zh-Hant':'en';
- document.title=L==='zh'?'再看一眼 🔎':'Look Again 🔎';
- $('logo').innerHTML=L==='zh'?'再看<b>一眼</b>':'LOOK <b>AGAIN</b>';
- $('sTitle').innerHTML=L==='zh'?'再看<b>一眼</b>':'LOOK<b>AGAIN</b>';
- $('lEn').className=L==='en'?'on':'';$('lZh').className=L==='zh'?'on':'';
- document.querySelectorAll('[data-t]').forEach(e=>{const v=T(e.dataset.t);if(typeof v==='string')e.textContent=v});
- $('aboutLink').href='about.html'+(L==='zh'?'?lang=zh-Hant':'');document.querySelectorAll('.foot a').forEach(a=>a.href=$('aboutLink').href);
- if(DATA)$('upd').textContent=T('updated')(fmtDate(DATA.updated),DATA.n);
- if(run){hud();if($('game').classList.contains('on'))renderRound(true);if($('end').classList.contains('on'))renderEnd()}
-}
-function fmtDate(iso){const d=new Date(iso.replace('Z',':00Z'));if(isNaN(d))return iso.slice(0,10);
- return d.toLocaleDateString(L==='zh'?'zh-TW':'en-US',{year:'numeric',month:'short',day:'numeric'})}
-$('langBtn').onclick=()=>{L=L==='zh'?'en':'zh';LS.set('la_lang',L);applyLang()};
-
-async function load(){
- for(let k=0;k<3;k++){try{const r=await fetch('cases.json',{cache:'no-cache'});if(!r.ok)throw 0;const d=await r.json();if(!d.cases||!d.cases.length)throw 0;return d}catch(e){await new Promise(r=>setTimeout(r,600*(k+1)))}}
- throw new Error('load');
-}
+// ---- seeded randomness (same docket for everyone on a date) ----
+function h32(s){let h=2166136261>>>0;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+function rng(seed){let a=h32(String(seed));return()=>{a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function shuf(a,r=Math.random){for(let i=a.length-1;i>0;i--){const j=r()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a}
+function today(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function dayNo(day){const [y,m,d]=day.split('-').map(Number);return Math.round((Date.UTC(y,m-1,d)-EPOCH)/864e5)+1}
+function grp(c){return GMAP[c.c]}
+function grpSet(c){const s=new Set([grp(c)]);for(const a of c.all||[])if(GMAP[a])s.add(GMAP[a]);return s}
+// ---- data ----
+async function getJSON(u,tries,opt){for(let k=0;k<tries;k++){try{const r=await fetch(u,{cache:'no-cache'});if(!r.ok){if(opt&&r.status===404)return null;throw 0}return await r.json()}catch(e){if(k<tries-1)await new Promise(r=>setTimeout(r,600*(k+1)))}}if(opt)return null;throw new Error('load')}
+const withTimeout=(p,ms)=>Promise.race([p,new Promise(r=>setTimeout(()=>r(null),ms))]);
+function loadClues(l){if(CLUES[l]||CLUES[l+'P'])return CLUES[l+'P']||Promise.resolve(CLUES[l]);
+ return CLUES[l+'P']=getJSON(`clues_${l}.json`,2,true).then(d=>{CLUES[l]=d&&typeof d==='object'?d:{};return CLUES[l]}).catch(()=>{CLUES[l]={};return CLUES[l]})}
 let loadP=null;
-function boot(){loadP=load().then(d=>{DATA=d;BY={};for(const c of d.cases)(BY[c.c]=BY[c.c]||[]).push(c);
- $('upd').textContent=T('updated')(fmtDate(d.updated),d.n);const sv=LS.get('la_run');if(sv&&sv.ids&&sv.ids.every(id=>d.cases.some(c=>c.id===id))&&sv.i<ROUNDS)$('resumeBtn').hidden=false;return d}).catch(e=>{throw e});return loadP}
+function boot(){loadP=getJSON('cases.json',3).then(d=>{if(!d.cases||!d.cases.length)throw new Error('empty');DATA=d;BYID={};POOL={};MISSING=[];
+ for(const c of d.cases){BYID[c.id]=c;const g=grp(c);if(g&&c.im)(POOL[g]=POOL[g]||[]).push(c);else if(c.c==='missing'&&c.im)MISSING.push(c)}
+ $('upd').textContent=T('updated')(fmtDate(d.updated),d.n);renderStart();return d});
+ getJSON('closed.json',1,true).then(d=>{if(d&&typeof d==='object'){CLOSED=d.cases||d;renderStart()}}).catch(()=>{});
+ return loadP}
 boot().catch(()=>{});
-
-function shuf(a){for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a}
-function newRun(){
- const seen=new Set(LS.get('la_seen')||[]);
- const pick=b=>{const pool=BY[b]||[];let fresh=pool.filter(c=>!seen.has(c.id)&&!chosen.includes(c));if(!fresh.length)fresh=pool.filter(c=>!chosen.includes(c));return fresh[Math.random()*fresh.length|0]};
- const chosen=[];
- const nm=MISS_MIN+(Math.random()<.4?1:0);
- for(let i=0;i<nm;i++){const c=pick('missing');if(c)chosen.push(c)}
- let bag=[];
- while(chosen.length<ROUNDS){if(!bag.length)bag=shuf(Object.keys(CAT).filter(b=>b!=='missing'&&BY[b]&&BY[b].length));const c=pick(bag.pop());if(c&&!chosen.includes(c))chosen.push(c)}
- shuf(chosen);
- const opts=chosen.map(c=>{const bad=new Set(c.all.concat([c.c]));let others=shuf(Object.keys(CAT).filter(b=>!bad.has(b)&&BY[b]));
-  let d=others.slice(0,3);if(c.c!=='missing'&&!bad.has('missing')&&!d.includes('missing')&&Math.random()<.5)d[0]='missing';return shuf([c.c,...d])});
- run={ids:chosen.map(c=>c.id),opts,i:0,picks:[]};save();
-}
-function save(){LS.set('la_run',run)}
-function cur(){return DATA.cases.find(c=>c.id===run.ids[run.i])}
-function caseOf(id){return DATA.cases.find(c=>c.id===id)}
-function hud(){const sc=run.picks.filter((p,i)=>p===caseOf(run.ids[i]).c).length;$('hud').textContent=`${Math.min(run.i+1,ROUNDS)}/${ROUNDS} · ✓${sc}`;$('prog').style.width=(run.picks.length/ROUNDS*100)+'%'}
-function show(id){for(const s of ['start','game','end'])$(s).classList.toggle('on',s===id);document.body.classList.toggle('ingame',id==='game');document.body.classList.toggle('atend',id==='end')}
-function money(n){if(!n)return T('noRw');if(L==='zh'){const w=n/1e4;return (w>=1?(w>=1e4?(w/1e4).toLocaleString('zh-TW')+' 億':w.toLocaleString('zh-TW',{maximumFractionDigits:1})+' 萬'):n.toLocaleString('zh-TW'))+' 美元'}
+loadClues(L);
+function fmtDate(iso){const d=new Date(String(iso).replace(/Z$/,':00Z'));if(isNaN(d))return String(iso).slice(0,10);
+ return d.toLocaleDateString(L==='zh'?'zh-TW':'en-US',{year:'numeric',month:'short',day:'numeric'})}
+function money(n){if(!n)return '';if(L==='zh'){const w=n/1e4;return (w>=1?(w>=1e4?(w/1e4).toLocaleString('zh-TW')+' 億':w.toLocaleString('zh-TW',{maximumFractionDigits:1})+' 萬'):n.toLocaleString('zh-TW'))+' 美元'}
  return n>=1e6?'$'+(n/1e6).toLocaleString('en-US',{maximumFractionDigits:1})+' million':'$'+n.toLocaleString('en-US')}
+// ---- clue ladders: curated file first, heuristic fallback from redacted poster fields ----
+function heur(c){const k=c.k,H=S[L].h,o=[];
+ if(k.y||k.age!=null)o.push(esc(H.when(k.y,k.age)));
+ if(k.of)o.push(esc(H.office(L==='zh'?k.ofz:k.of)));else if(k.pl)o.push(esc(H.place(L==='zh'?k.plz:k.pl)));
+ o.push(esc(H.rw(money(k.rw))));
+ if(k.lg)o.push(esc(H.lang((L==='zh'?k.lgz:k.lg).join(L==='zh'?'、':', '))));
+ else if(k.oc)o.push(esc(H.work('\u0001'+k.oc.join(', ')+'\u0002')).replace('\u0001','<span lang="en" class="en">').replace('\u0002','</span>'));
+ if(k.ex){const e=esc(k.ex).replace(/▇▇/g,'<mark aria-label="redacted">▇▇</mark>');o.push(esc(H.ex('\u0001')).replace('\u0001',`<span lang="en" class="en">${e}</span>`))}
+ return o.slice(-5)}
+function cluesOf(c){const f=CLUES[L]&&CLUES[L][c.id];
+ if(Array.isArray(f)){const v=f.filter(x=>typeof x==='string'&&x.trim()).slice(0,5);if(v.length>=3)return v.map(x=>esc(x).replace(/▇+/g,m=>`<mark aria-label="redacted">${m}</mark>`))}
+ return heur(c)}
+// ---- runs ----
+function docketIds(day){const r=rng('docket|'+day),cnt={},ids=[];
+ while(ids.length<DOCKET){const avail=GROUPS.filter(g=>(POOL[g]||[]).length&&(cnt[g]||0)<2&&(POOL[g].length>(cnt[g]||0)));if(!avail.length)break;
+  const g=avail[r()*avail.length|0];cnt[g]=(cnt[g]||0)+1;
+  const best=POOL[g].filter(c=>!ids.includes(c.id)).map(c=>[h32(day+'|'+c.id),c.id]).sort((a,b)=>a[0]-b[0])[0];if(best)ids.push(best[1])}
+ return ids}
+function optsFor(c,r){const set=grpSet(c),g=grp(c);const d=shuf(GROUPS.filter(x=>!set.has(x)&&(POOL[x]||[]).length),r).slice(0,3);return shuf([g,...d],r)}
+function pickEndless(){const seen=new Set(LS.get('la2_seen')||[]);const used=new Set(run?run.ids:[]);
+ const gs=GROUPS.filter(g=>(POOL[g]||[]).length);const g=gs[Math.random()*gs.length|0];
+ let p=POOL[g].filter(c=>!seen.has(c.id)&&!used.has(c.id));if(!p.length)p=POOL[g].filter(c=>!used.has(c.id));if(!p.length)p=POOL[g];return p[Math.random()*p.length|0].id}
+function newDaily(){const day=today(),ids=docketIds(day),r=rng('opts|'+day);run={mode:'d',day,ids,opts:ids.map(id=>optsFor(BYID[id],r)),i:0,n:1,res:[]};save()}
+function newEndless(){run={mode:'e',ids:[],opts:[],i:0,n:1,res:[],lives:LIVES};addEndless();save()}
+function addEndless(){const id=pickEndless();run.ids.push(id);run.opts.push(optsFor(BYID[id]))}
+function save(){LS.set(run.mode==='d'?'la2_daily':'la2_endless',run)}
+function cur(){return BYID[run.ids[run.i]]}
+function score(){return run.res.reduce((s,x)=>s+x.p,0)}
+function total(){return run.mode==='d'?run.ids.length:run.res.length}
+function show(id){for(const s of ['start','game','end'])$(s).classList.toggle('on',s===id);document.body.classList.toggle('ingame',id==='game');document.body.classList.toggle('atend',id==='end');if(id==='start'){$('hud').textContent='';$('prog').style.width='0'}}
+function bump(e){e.classList.remove('pop');void e.offsetWidth;e.classList.add('pop')}
+function hud(){if(!run)return;const sc=score();
+ if(run.mode==='d'){$('hud').textContent=`${Math.min(run.i+1,run.ids.length)}/${run.ids.length} · ${sc} ${L==='zh'?'分':'pts'}`;$('prog').style.width=(run.res.length/run.ids.length*100)+'%'}
+ else{$('hud').textContent=`${'❤️'.repeat(run.lives)}${'🖤'.repeat(LIVES-run.lives)} · ${sc}`;$('prog').style.width=((LIVES-run.lives)/LIVES*100)+'%'}}
 const preloaded=new Set();
 function preload(c){if(!c||!c.im||preloaded.has(c.im))return;preloaded.add(c.im);const i=new Image();i.decoding='async';i.src=c.im}
-function renderRound(keep){
- const c=cur(),k=c.k,done=run.picks.length>run.i;
- $('caseNo').textContent=T('case')(run.i+1,ROUNDS);$('caseYr').textContent='';
- const cl=[];
- if(k.y)cl.push([T('year'),k.y]);
- if(k.age!=null)cl.push([T('age'),L==='zh'?`約 ${k.age} 歲`:`≈${k.age}`]);
- if(k.pl)cl.push([T('place'),L==='zh'?k.plz:k.pl]);else if(k.of)cl.push([T('office'),L==='zh'?k.ofz:k.of]);
- cl.push([T('reward'),money(k.rw)]);
- if(k.lg)cl.push([T('speaks'),(L==='zh'?k.lgz:k.lg).join(L==='zh'?'、':', ')]);
- if(k.oc)cl.push([T('work'),k.oc.join(', '),'en']);
- $('clues').innerHTML=cl.map(([a,b,lg])=>`<div class="clue"><small>${esc(a)}</small><span${lg&&L==='zh'?' lang="en"':''}>${esc(b)}</span></div>`).join('');
- const exH=esc(k.ex).replace(/▇▇/g,'<mark aria-label="redacted">▇▇</mark>').replace(/^Case: /,L==='zh'?'案情：':'Case: ');
- $('ex').innerHTML=`<small>${esc(T('ex'))}</small><span lang="en">${exH}</span>`;
- const o=run.opts[run.i];
- $('opts').innerHTML=o.map((b,j)=>`<button type="button" data-b="${b}" id="b${j}">${esc(CAT[b][L])}</button>`).join('');
+function renderRound(fresh){
+ const c=cur(),done=run.res.length>run.i,cl=cluesOf(c),N=cl.length;run.n=Math.max(1,Math.min(run.n,N));
+ $('caseNo').textContent=run.mode==='d'?T('caseD')(run.i+1,run.ids.length):T('caseE')(run.i+1);
+ $('ladder').innerHTML=cl.map((_,j)=>`<i${j<run.n?' class="on"':''}></i>`).join('');
+ $('worth').textContent=T('worth')(PTS[run.n-1]);
+ $('clues').innerHTML=cl.slice(0,run.n).map((x,j)=>`<li class="${j===run.n-1?(fresh?'new':'new last'):''}"><b>${j+1}</b><span>${x}</span></li>`).join('');
+ if(!fresh)$('clues').querySelectorAll('.new').forEach(e=>e.style.animation='none');
+ const cb=$('clueBtn');if(run.n<N){cb.disabled=false;cb.innerHTML=T('more')(PTS[run.n])}else{cb.disabled=true;cb.textContent=T('last')}
+ $('opts').innerHTML=run.opts[run.i].map((b,j)=>`<button type="button" data-b="${b}" id="b${j}"><span aria-hidden="true">${j+1} </span>${esc(CAT[b][L])}</button>`).join('');
  $('opts').querySelectorAll('button').forEach(btn=>btn.onclick=()=>answer(btn.dataset.b));
  $('game').classList.toggle('done',done);
- requestAnimationFrame(clipCheck);
- if(done)renderReveal(true);else if(!keep){preload(c);preload(caseOf(run.ids[run.i+1]))}
- hud();
-}
-function clipCheck(){const e=$('ex');e.classList.toggle('clip',e.scrollHeight>e.clientHeight+2);let m=$('moreBtn');
- if(e.scrollHeight>e.clientHeight+2&&!$('game').classList.contains('done')){if(!m){m=document.createElement('button');m.id='moreBtn';m.className='more';m.type='button';m.onclick=showEx;$('card').appendChild(m)}m.textContent=T('more');m.hidden=false}else if(m)m.hidden=true}
-function showEx(){const c=cur();openDlg(T('ex'),`<p lang="en">${esc(c.k.ex).replace(/▇▇/g,'<mark style="background:#1d1b17;color:#1d1b17">▇▇</mark>')}</p>`)}
-function answer(b){if(run.picks.length>run.i)return;run.picks.push(b);save();
- const c=cur();$('opts').querySelectorAll('button').forEach(x=>{x.disabled=true;if(x.dataset.b===c.c)x.classList.add('right');else if(x.dataset.b===b)x.classList.add('wrong')});
- $('game').classList.add('done');renderReveal(false);hud();if(navigator.vibrate)try{navigator.vibrate(b===c.c?15:[20,40,20])}catch(e){}
- preload(caseOf(run.ids[run.i+1]));preload(caseOf(run.ids[run.i+2]));
-}
-function renderReveal(re){
- const c=cur(),b=run.picks[run.i],ok=b===c.c;
- $('opts').querySelectorAll('button').forEach(x=>{x.disabled=true;x.classList.toggle('right',x.dataset.b===c.c);x.classList.toggle('wrong',x.dataset.b===b&&!ok)});
- const m=$('moreBtn');if(m)m.hidden=true;
- $('verdict').textContent=ok?T('right'):T('wrong');$('verdict').className='verdict '+(ok?'ok':'no');
- $('rname').textContent=c.title;$('rname').lang='en';
- $('rcat').textContent=T('was')+' '+CAT[c.c][L];
+ if(done)renderReveal(true);else{preload(c);fit()}
+ hud()}
+function fit(){const e=$('clues');let k=1.45;e.style.setProperty('--k',k);while(e.scrollHeight>e.clientHeight+1&&k>.6){k-=.05;e.style.setProperty('--k',k.toFixed(2))}}
+function moreClue(){if(run.res.length>run.i)return;const N=cluesOf(cur()).length;if(run.n>=N)return;run.n++;save();renderRound(true);bump($('worth'));if(navigator.vibrate)try{navigator.vibrate(8)}catch(e){}}
+$('clueBtn').onclick=moreClue;
+function answer(b){if(run.res.length>run.i)return;const c=cur(),ok=b===grp(c),p=ok?PTS[run.n-1]:0;
+ run.res.push({b,n:run.n,ok,p});if(run.mode==='e'&&!ok)run.lives--;save();addBook(c,ok,p);
+ $('game').classList.add('done');renderReveal(false);hud();bump($('hud'));if(navigator.vibrate)try{navigator.vibrate(ok?[15,30,15]:[40])}catch(e){}
+ preload(BYID[run.ids[run.i+1]])}
+function nameOf(c){return (c.title||'').split(/ - | – /)[0]}
+function renderReveal(re){const c=cur(),x=run.res[run.i],g=grp(c);
+ $('opts').querySelectorAll('button').forEach(e=>{e.disabled=true;e.classList.toggle('right',e.dataset.b===g);e.classList.toggle('wrong',e.dataset.b===x.b&&!x.ok)});
+ $('verdict').textContent=x.ok?T('right')(x.p):T('wrong');$('verdict').className='verdict '+(x.ok?'ok':'no');
+ $('rname').textContent=nameOf(c);$('rname').lang='en';
+ const lst=LIST[c.c]?`<br><span class="badge">${esc(T('onList'))} ${esc(LIST[c.c][L])}</span>`:'';
+ $('rcat').innerHTML=`${esc(T('was'))} ${esc(CAT[g][L])}${c.c==='topten'?lst:''}`;
  const first=(c.r.t||[]).slice(0,2).join(' ');
- $('rd').innerHTML=(L==='zh'?`<span style="display:block;font-weight:700">${esc(T('enNote'))}</span>`:'')+`<span lang="en">${esc(c.r.d?c.r.d+' — ':'')}${esc(first)}</span>`;
- $('rlegal').textContent=c.c==='missing'?T('lgMissing'):c.c==='seeking'?T('lgSeek'):T('lgWanted');
- $('fbiLink').href=c.url;
+ $('rd').innerHTML=(L==='zh'?`<b>${esc(T('enNote'))}</b> `:'')+`<span lang="en">${esc(c.r.d?c.r.d+' — ':'')}${esc(first)}</span>`;
+ $('rlegal').textContent=T('lgWanted');$('fbiLink').href=c.url;
  const pic=$('pic');pic.innerHTML='';
- if(c.im){const im=new Image();im.alt=c.title;im.decoding='async';im.onerror=()=>{pic.textContent=T('noPic')};im.src=c.im;pic.appendChild(im)}else pic.textContent=T('noPic');
- $('next').textContent=run.i+1>=ROUNDS?T('finish'):T('next');
- if(!re)setTimeout(()=>$('next').focus({preventScroll:true}),50);
-}
+ if(c.im){const im=new Image();im.alt=nameOf(c);im.decoding='async';im.onerror=()=>{im.remove();pic.prepend(T('noPic'))};im.src=c.im;pic.appendChild(im)}else pic.textContent=T('noPic');
+ const st=document.createElement('span');st.className='stamp '+(x.ok?'ok':'no');st.setAttribute('aria-hidden','true');st.textContent=x.ok?`+${x.p}`:'✗';pic.appendChild(st);
+ const over=run.mode==='d'?run.i+1>=run.ids.length:run.lives<=0;$('next').textContent=over?T('finish'):T('next');
+ if(!re)setTimeout(()=>$('next').focus({preventScroll:true}),60)}
 function fullPoster(){const c=cur(),r=c.r;let h='';
- h+=`<h3>${esc(T('fullFiled'))}</h3><p>${esc(CAT[c.c][L])}</p>`;
- if(L==='zh')h+=`<p><b>${esc(T('enNote'))}</b></p>`;
+ h+=`<h3>${esc(T('fullFiled'))}</h3><p>${esc(CAT[grp(c)][L])}${LIST[c.c]?' · '+esc(LIST[c.c][L]):''}</p>`;
  if(r.w)h+=`<p class="w" lang="en">${esc(r.w)}</p>`;
  if(r.d)h+=`<h3>${esc(T('fullDesc'))}</h3><p lang="en">${esc(r.d)}</p>`;
  if(r.t&&r.t.length)h+=`<h3>${esc(T('fullText'))}</h3>`+r.t.map(s=>`<p lang="en">${esc(s)}</p>`).join('');
- if(r.rm&&r.rm.length)h+=`<h3>${esc(T('fullRm'))}</h3>`+r.rm.map(s=>`<p lang="en">${esc(s)}</p>`).join('');
+ if(r.rm&&r.rm.filter(Boolean).length)h+=`<h3>${esc(T('fullRm'))}</h3>`+r.rm.filter(Boolean).map(s=>`<p lang="en">${esc(s)}</p>`).join('');
  if(r.rw)h+=`<h3>${esc(T('fullRw'))}</h3><p lang="en">${esc(r.rw)}</p>`;
- h+=`<p><i>${esc(c.c==='missing'?T('lgMissing'):c.c==='seeking'?T('lgSeek'):T('lgWanted'))}</i></p><p><i>${esc(T('cutNote'))}</i></p>`;
+ h+=`<p><i>${esc(T('lgWanted'))}</i></p><p><i>${esc(T('cutNote'))}</i></p>`;
  h+=`<p><a href="https://tips.fbi.gov/" target="_blank" rel="noopener"><b>${esc(T('tip'))}</b></a><br><a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(T('fbi'))}</a></p>`;
- openDlg(c.title,h)}
+ openDlg(nameOf(c),h)}
 $('fullBtn').onclick=fullPoster;
 function openDlg(t,h){$('dlgT').textContent=t;$('dlgB').innerHTML=h;$('dlgB').scrollTop=0;const d=$('dlg');if(!d.open){d.showModal();history.pushState({dlg:1},'')}}
 function closeDlg(){const d=$('dlg');if(d.open){d.close();if(history.state&&history.state.dlg)history.back()}}
 $('dlgX').onclick=closeDlg;$('dlg').addEventListener('click',e=>{if(e.target===$('dlg'))closeDlg()});
 $('dlg').addEventListener('cancel',e=>{e.preventDefault();closeDlg()});
 addEventListener('popstate',()=>{const d=$('dlg');if(d.open)d.close()});
-$('next').onclick=()=>{run.i++;save();if(run.i>=ROUNDS){finish()}else{renderRound();$('b0')&&$('b0').focus({preventScroll:true})}};
-function finish(){const seen=new Set(LS.get('la_seen')||[]);run.ids.forEach(i=>seen.add(i));LS.set('la_seen',[...seen].slice(-400));LS.set('la_last',run);LS.del('la_run');$('resumeBtn').hidden=true;show('end');renderEnd()}
-function stats(){const cs=run.ids.map(caseOf);const sc=run.picks.filter((p,i)=>p===cs[i].c).length;const mi=cs.filter(c=>c.c==='missing').length;
- const mc=cs.filter((c,i)=>c.c==='missing'&&run.picks[i]&&CAT[run.picks[i]].crime).length;return{cs,sc,mi,mc}}
-function renderEnd(){const{cs,sc,mi,mc}=stats();
- $('score').textContent=`${sc}/${ROUNDS}`;$('rank').textContent=T('rank')[sc>=10?3:sc>=7?2:sc>=4?1:0];
- $('grid').textContent=cs.map((c,i)=>run.picks[i]===c.c?'🟩':'🟥').join('');
- $('take').innerHTML=`<p>${T('t1')(mi,ROUNDS)}</p><p>${mc?T('t2')(mc,mi):T('t2ok')(mi)}</p><p>${esc(T('t3'))}</p>`;
- $('hud').textContent=`${ROUNDS}/${ROUNDS} · ✓${sc}`;$('prog').style.width='100%'}
-$('metBtn').onclick=()=>{const{cs}=stats();openDlg(T('metT'),`<ul>${cs.map((c,i)=>`<li>${c.im?`<img src="${esc(c.im)}" alt="" loading="lazy">`:''}<div><a href="${esc(c.url)}" target="_blank" rel="noopener" lang="en">${esc(c.title)}</a><br>${esc(CAT[c.c][L])} ${run.picks[i]===c.c?'✓':'✗'}</div></li>`).join('')}</ul><p><a href="https://tips.fbi.gov/" target="_blank" rel="noopener"><b>${esc(T('tip'))}</b></a></p>`)};
-$('shareBtn').onclick=async()=>{const{cs,sc,mi}=stats();const txt=T('sh')(sc,ROUNDS,mi,ROUNDS)+'\n'+cs.map((c,i)=>run.picks[i]===c.c?'🟩':'🟥').join('');const url='https://liyun-li.github.io/look-again/';
+$('next').onclick=()=>{const over=run.mode==='d'?run.i+1>=run.ids.length:run.lives<=0;
+ if(over){finish();return}run.i++;run.n=1;if(run.mode==='e'&&run.i>=run.ids.length)addEndless();save();renderRound(true);$('b0')&&$('b0').focus({preventScroll:true})};
+// ---- casebook ----
+function addBook(c,ok,p){const b=(LS.get('la2_book')||[]).filter(x=>x.id!==c.id);
+ b.unshift({id:c.id,t:nameOf(c),g:grp(c),l:c.c,u:c.url,d:today(),ok,p});LS.set('la2_book',b.slice(0,400))}
+function closedIds(){if(!DATA)return[];return (LS.get('la2_book')||[]).filter(x=>!BYID[x.id]).map(x=>x.id)}
+function newClosed(){const seen=new Set(LS.get('la2_closedSeen')||[]);return closedIds().filter(i=>!seen.has(i)).length}
+function closedNote(id){const z=CLOSED&&CLOSED[id];if(!z||typeof z!=='object')return '';
+ const n=L==='zh'?(z.note_zh||z.zh||z.note):(z.note_en||z.en||z.note);const when=z.removed||z.closed||z.date||'';
+ return `${n?`<br><span>${esc(n)}</span>`:''}${when?`<br><small>${esc(String(when).slice(0,10))}</small>`:''}`}
+function openBook(){const b=LS.get('la2_book')||[];const cl=closedIds();let h='';
+ if(!b.length)h=`<p>${esc(T('bookEmpty'))}</p>`;
+ else{h=`<p>${esc(T('bookIntro')(b.length,cl.length))}</p><ul>`+b.map(x=>{const live=BYID[x.id];
+  const img=live&&live.im?`<img src="${esc(live.im)}" alt="" loading="lazy">`:`<span class="ph" aria-hidden="true">📁</span>`;
+  const st=live?`<span class="open">${esc(T('stillOpen'))}</span>`:`<span class="closed">${esc(T('closed'))}</span>${closedNote(x.id)}`;
+  return `<li>${img}<div><a href="${esc(x.u)}" target="_blank" rel="noopener" lang="en">${esc(x.t)}</a><br>${esc(CAT[x.g]?CAT[x.g][L]:'')} ${x.ok?'✓ +'+x.p:'✗'} · <small>${esc(T('played')(x.d))}</small><br>${st}</div></li>`}).join('')+`</ul>`;
+  if(cl.length)h+=`<p><small>${esc(T('closedWhy'))}</small></p>`}
+ h+=`<p><a href="https://tips.fbi.gov/" target="_blank" rel="noopener"><b>${esc(T('tip'))}</b></a></p>`;
+ LS.set('la2_closedSeen',cl);openDlg(T('bookT'),h);renderStart()}
+$('bookBtn').onclick=openBook;$('book2Btn').onclick=openBook;
+// ---- end ----
+function finish(){const seen=new Set(LS.get('la2_seen')||[]);run.ids.forEach(i=>seen.add(i));LS.set('la2_seen',[...seen].slice(-500));
+ if(run.mode==='d'){const days=new Set(LS.get('la2_days')||[]);days.add(run.day);LS.set('la2_days',[...days].sort().slice(-400));
+  const res=LS.get('la2_dres')||{};res[run.day]={res:run.res,ids:run.ids};LS.set('la2_dres',res);run.fin=1;save()}
+ else{const b=LS.get('la2_best')||0;run.best=b;if(score()>b)LS.set('la2_best',score());LS.del('la2_endless')}
+ lastEnd=run;show('end');renderEnd()}
+function streak(){const days=new Set(LS.get('la2_days')||[]);let n=0;const d=new Date();if(!days.has(today()))d.setDate(d.getDate()-1);
+ for(;;){const s=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');if(!days.has(s))break;n++;d.setDate(d.getDate()-1)}return n}
+function rows(r){return r.res.map(x=>'🟨'.repeat(x.n-1)+(x.ok?'🟩':'🟥'))}
+function renderEnd(){const r=lastEnd;if(!r)return;run=r;const sc=score();
+ if(r.mode==='d'){const mx=r.ids.length*PTS[0];$('score').innerHTML=`${sc}<small>/${mx}</small>`;const q=sc/mx;$('rank').textContent=T('rank')[q>=.9?4:q>=.65?3:q>=.4?2:q>=.2?1:0];
+  $('streak').textContent=T('streak')(streak());$('againBtn').textContent=T('endless2');$('hud').textContent=`#${dayNo(r.day)} · ${sc} ${L==='zh'?'分':'pts'}`}
+ else{$('score').textContent=sc;const best=Math.max(r.best||0,sc);$('rank').textContent=sc>(r.best||0)&&sc>0?T('newBest'):T('rank')[Math.min(4,Math.floor(r.res.length/4))];
+  $('streak').textContent=T('endlessRes')(r.res.length,best);$('againBtn').textContent=T('again');$('hud').textContent=`${sc} ${L==='zh'?'分':'pts'}`}
+ $('grid').innerHTML=rows(r).map(x=>`<span>${x}</span>`).join('');$('prog').style.width='100%';
+ renderHelp(r.mode==='d'?r.day:null)}
+let helpPick=null;
+function renderHelp(day){if(!MISSING.length){$('help').hidden=true;return}$('help').hidden=false;
+ if(!helpPick||helpPick.k!==(day||'e')){const p=MISSING.slice();shuf(p,day?rng('help|'+day):Math.random);helpPick={k:day||'e',ids:p.slice(0,3).map(c=>c.id)}}
+ $('hf').innerHTML=helpPick.ids.map(id=>BYID[id]).filter(Boolean).map(c=>{const k=c.k,pl=L==='zh'?k.plz:k.pl;const m=[k.y?T('since')(k.y):'',pl||''].filter(Boolean).join(' · ');
+  return `<div class="hfc"><a href="${esc(c.url)}" target="_blank" rel="noopener"><img src="${esc(c.im)}" alt="${esc(nameOf(c))}" loading="lazy"></a><a class="n" href="${esc(c.url)}" target="_blank" rel="noopener" lang="en">${esc(titleCase(nameOf(c)))}</a><span class="m">${esc(m)}</span><a class="t" href="https://tips.fbi.gov/" target="_blank" rel="noopener" aria-label="${esc(T('tipS'))} ${esc(titleCase(nameOf(c)))}">${esc(T('tipS'))}</a></div>`}).join('')}
+function titleCase(s){return s.toLowerCase().replace(/(^|[\s\-'"(])(\p{L})/gu,(m,a,b)=>a+b.toUpperCase())}
+$('shareBtn').onclick=async()=>{const r=lastEnd,sc=score();let txt;
+ if(r.mode==='d'){txt=T('sh')(dayNo(r.day),sc,r.ids.length*PTS[0])+'\n'+rows(r).join('\n');const s=streak();if(s>1)txt+='\n'+T('shStreak')(s)}
+ else txt=T('shE')(sc,r.res.length)+'\n'+rows(r).join(' ');
+ const url='https://liyun-li.github.io/look-again/';
  try{if(navigator.share){await navigator.share({text:txt,url});return}}catch(e){if(e&&e.name==='AbortError')return}
  try{await navigator.clipboard.writeText(txt+'\n'+url);$('toast').textContent=T('copied')}catch(e){$('toast').textContent=txt}setTimeout(()=>$('toast').textContent='',2500)};
-async function startGame(resume){
+$('againBtn').onclick=()=>start('e',false);
+// ---- start ----
+function renderStart(){const day=today(),dn=dayNo(day),d=LS.get('la2_daily'),res=(LS.get('la2_dres')||{})[day];
+ if(res){const p=res.res.reduce((s,x)=>s+x.p,0);$('dailyBtn').innerHTML=T('dailyDone')(dn,p)}
+ else if(d&&d.day===day&&d.res.length)$('dailyBtn').innerHTML=T('dailyRes')(dn,d.i);
+ else $('dailyBtn').innerHTML=T('daily')(dn);
+ $('endlessBtn').innerHTML=T('endless')(LS.get('la2_best')||0);
+ const b=(LS.get('la2_book')||[]).length,nc=DATA?newClosed():0;$('bookBtn').innerHTML=esc(T('bookB')(b))+(nc?`<span class="dot" aria-label="${nc} closed">${nc}</span>`:'')}
+async function start(mode,fromBtn){
  show('game');$('loading').hidden=false;$('retryBtn').hidden=true;$('loading').firstElementChild.textContent=T('loading');
- $('game').classList.add('wait');$('game').classList.remove('done');$('opts').innerHTML='';
- try{await (loadP||boot())}catch(e){loadP=null;$('loading').firstElementChild.textContent=T('loadFail');$('retryBtn').hidden=false;return}
+ $('game').classList.add('wait');$('game').classList.remove('done');$('opts').innerHTML='';$('hud').textContent='';
+ try{await (loadP||boot())}catch(e){loadP=null;$('loading').firstElementChild.textContent=T('loadFail');$('retryBtn').hidden=false;$('retryBtn').onclick=()=>start(mode);return}
+ await withTimeout(loadClues(L),4000);
  $('loading').hidden=true;$('game').classList.remove('wait');
- if(resume){run=LS.get('la_run')}else newRun();
- renderRound();$('b0')&&$('b0').focus({preventScroll:true})}
-$('goBtn').onclick=()=>startGame(false);$('resumeBtn').onclick=()=>startGame(true);
-$('retryBtn').onclick=()=>{loadP=null;startGame(false)};
-$('againBtn').onclick=()=>startGame(false);
-addEventListener('resize',()=>{if($('game').classList.contains('on')&&run&&!$('game').classList.contains('done'))clipCheck()});
-addEventListener('keydown',e=>{if($('dlg').open)return;if($('game').classList.contains('on')&&run){const n='1234'.indexOf(e.key);if(n>=0&&$('b'+n)&&!$('b'+n).disabled){$('b'+n).click()}else if(e.key==='Enter'&&$('game').classList.contains('done')&&document.activeElement===document.body)$('next').click()}});
+ if(mode==='d'){const day=today(),res=(LS.get('la2_dres')||{})[day];
+  if(res){const d=LS.get('la2_daily');lastEnd=d&&d.day===day?d:{mode:'d',day,ids:res.ids,res:res.res};show('end');renderEnd();return}
+  const d=LS.get('la2_daily');if(d&&d.day===day&&d.ids.every(i=>BYID[i]))run=d;else newDaily()}
+ else{const e=LS.get('la2_endless');if(e&&e.lives>0&&e.ids.every(i=>BYID[i]))run=e;else newEndless()}
+ renderRound(true);run.ids.slice(run.i,run.i+2).forEach(i=>preload(BYID[i]));$('b0')&&$('b0').focus({preventScroll:true})}
+$('dailyBtn').onclick=()=>start('d');$('endlessBtn').onclick=()=>start('e');
+$('logo').onclick=()=>{closeDlg();show('start');renderStart()};
+function applyLang(){
+ document.documentElement.lang=L==='zh'?'zh-Hant':'en';document.title=L==='zh'?'再看一眼 🔎':'Look Again 🔎';
+ $('logo').innerHTML=L==='zh'?'再看<b>一眼</b>':'LOOK <b>AGAIN</b>';$('sTitle').innerHTML=L==='zh'?'再看<b>一眼</b>':'LOOK<b>AGAIN</b>';
+ $('lEn').className=L==='en'?'on':'';$('lZh').className=L==='zh'?'on':'';
+ document.querySelectorAll('[data-t]').forEach(e=>{const v=T(e.dataset.t);if(typeof v==='string')e.textContent=v});
+ const ab='about.html'+(L==='zh'?'?lang=zh-Hant':'');$('aboutLink').href=ab;document.querySelectorAll('.foot a').forEach(a=>a.href=ab);
+ if(DATA)$('upd').textContent=T('updated')(fmtDate(DATA.updated),DATA.n);
+ $('book2Btn').setAttribute('aria-label',T('book').replace('📒 ',''));$('book2Btn').title=$('book2Btn').getAttribute('aria-label');$('dlgX').setAttribute('aria-label',L==='zh'?'關閉':'Close');
+ renderStart();
+ if($('game').classList.contains('on')&&run&&!$('game').classList.contains('wait'))loadClues(L).then(()=>renderRound(false));
+ if($('end').classList.contains('on'))renderEnd()}
+$('langBtn').onclick=()=>{L=L==='zh'?'en':'zh';LS.set('la_lang',L);applyLang()};
+addEventListener('resize',()=>{if($('game').classList.contains('on')&&run&&!$('game').classList.contains('done'))fit()});
+addEventListener('keydown',e=>{if($('dlg').open||!$('game').classList.contains('on')||!run||e.ctrlKey||e.metaKey||e.altKey)return;const n='1234'.indexOf(e.key);
+ if(n>=0&&$('b'+n)&&!$('b'+n).disabled)$('b'+n).click();else if((e.key==='c'||e.key==='C'||e.key===' ')&&!$('game').classList.contains('done')&&document.activeElement.tagName!=='BUTTON'){e.preventDefault();moreClue()}
+ else if(e.key==='Enter'&&$('game').classList.contains('done')&&document.activeElement===document.body)$('next').click()});
 applyLang();
 </script>
 </body></html>
