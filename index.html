@@ -2,11 +2,11 @@
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Look Again 🔎</title>
-<meta name="description" content="Real FBI cases, one short clue at a time. Guess the file early for more points. The face comes last.">
+<meta name="description" content="Real FBI cases: one clue, one optional hint. Guess the kind of case for 3 points. The face comes last.">
 <meta name="theme-color" content="#121519">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23121519'/%3E%3Ccircle cx='14' cy='14' r='7' fill='none' stroke='%23f0b429' stroke-width='3'/%3E%3Cpath d='M19 19l7 7' stroke='%23f0b429' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E">
 <meta property="og:type" content="website"><meta property="og:url" content="https://liyun-li.github.io/look-again/">
-<meta property="og:title" content="Look Again 🔎"><meta property="og:description" content="Real FBI cases, one clue at a time. Call it early, score more. The face comes last.">
+<meta property="og:title" content="Look Again 🔎"><meta property="og:description" content="Real FBI cases: one clue, one optional hint. The face comes last.">
 <meta property="og:image" content="https://liyun-li.github.io/look-again/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="Look Again: a redacted FBI case file and a magnifying glass.">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://liyun-li.github.io/look-again/og.png">
 <style>
@@ -159,6 +159,8 @@ body.ingame .foot,body.atend .foot{display:none}
 #game.done .opts{display:none}
 .iconb{padding-inline:.7rem}
 
+.meta{flex:none;margin:0;font:700 clamp(.6rem,min(3.1vw,2dvh),.8rem)/1.3 var(--mono);color:#5e5646;letter-spacing:.02em;overflow-wrap:anywhere}
+
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 </style></head><body>
 <main class="app">
@@ -183,6 +185,7 @@ body.ingame .foot,body.atend .foot{display:none}
   <div class="chead"><span id="caseNo"></span><span class="ladder" id="ladder" aria-hidden="true"></span><span class="worth" id="worth"></span></div>
   <div class="loading" id="loading" hidden><span data-t="loading"></span><button class="ghost" id="retryBtn" type="button" hidden data-t="retry"></button></div>
   <div class="ask">
+   <p class="meta" id="meta"></p>
    <ol class="clues" id="clues" aria-live="polite"></ol>
    <button class="clueb" id="clueBtn" type="button"></button>
   </div>
@@ -216,7 +219,7 @@ body.ingame .foot,body.atend .foot{display:none}
 
 <script>
 "use strict";
-const PTS=[5,3,2,1,1],LIVES=3,DOCKET=5,EPOCH=Date.UTC(2026,10,2);
+const PTS=[3,1],LIVES=3,DOCKET=5,EPOCH=Date.UTC(2026,10,2);
 // FBI list -> broad game category. Missing, parental-kidnapping and seeking-information files are never scored.
 const GMAP={cyber:'cyber',spy:'spy',terror:'terror',money:'money',violent:'violent',gangs:'violent',topten:'violent'};
 const GROUPS=['cyber','spy','terror','money','violent'];
@@ -230,7 +233,7 @@ const CAT={
 const LIST={topten:{en:"⭐ FBI Ten Most Wanted",zh:"⭐ FBI 十大通緝要犯"},gangs:{en:"Criminal enterprises",zh:"犯罪集團"},violent:{en:"Violent crime",zh:"暴力犯罪"},
  cyber:{en:"Cyber’s Most Wanted",zh:"網路犯罪通緝"},spy:{en:"Counterintelligence",zh:"反情報"},terror:{en:"Terrorism",zh:"恐怖主義"},money:{en:"White-collar crime",zh:"白領犯罪"}};
 const S={en:{
- tag:"Real FBI cases, one clue at a time. Call it early for more points. The face comes last.",
+ tag:"Real FBI cases. One clue, one optional hint. Call it without the hint for 3 points. The face comes last.",
  daily:n=>`TODAY’S DOCKET #${n}<small>5 cases · same for everyone</small>`,
  dailyRes:(n,i)=>`RESUME DOCKET #${n}<small>case ${i+1} of 5</small>`,
  dailyDone:(n,p)=>`✓ DOCKET #${n} · ${p} PTS<small>See results · new docket tomorrow</small>`,
@@ -240,7 +243,7 @@ const S={en:{
  legal:"Charges are allegations. Everyone is presumed innocent until proven guilty.",
  about:"About & data",tipline:"FBI tip line",updated:(d,n)=>`FBI data refreshed ${d} · ${n} cases`,
  q:"Which kind of case is this?",caseD:(i,n)=>`CASE ${i}/${n}`,caseE:i=>`CASE ${i}`,
- worth:p=>`+${p}`,more:p=>`🔎 Another clue <small>→ worth +${p}</small>`,last:"Last clue. Make the call!",
+ worth:p=>`+${p}`,more:p=>`💡 Hint <small>→ then worth +${p}</small>`,last:"Hint used. Make the call!",noHint:"No hint on this one. Make the call!",
  right:p=>`✓ Cracked it! +${p}`,wrong:"✗ Not this time",was:"It was",onList:"On the list:",
  tip:"Seen them? Submit a tip ↗",full:"Full poster",fbi:"FBI page ↗",next:"NEXT →",finish:"RESULTS →",
  lgWanted:"Charges are allegations. Presumed innocent until proven guilty.",
@@ -262,7 +265,7 @@ const S={en:{
   office:o=>`📍 The FBI’s ${o} office has the case.`,place:p=>`📍 Place: ${p}`,
   rw:r=>r?`💵 Reward: up to ${r}.`:`💵 No reward listed.`,lang:l=>`🗣️ Speaks ${l}.`,work:w=>`💼 Has worked as: ${w}`,ex:e=>`📄 “${e}”`}
 },zh:{
- tag:"真實 FBI 案件，一次一條線索。越早猜，分數越高。照片最後才揭曉。",
+ tag:"真實 FBI 案件。一條線索，外加一次提示。不看提示猜中得 3 分。照片最後才揭曉。",
  daily:n=>`今日案卷 #${n}<small>5 個案件・大家都一樣</small>`,
  dailyRes:(n,i)=>`繼續案卷 #${n}<small>第 ${i+1} / 5 案</small>`,
  dailyDone:(n,p)=>`✓ 案卷 #${n}・${p} 分<small>看結果・明天有新案卷</small>`,
@@ -272,7 +275,7 @@ const S={en:{
  legal:"起訴內容僅為指控，未經法院定罪前，任何人皆推定無罪。",
  about:"關於與資料來源",tipline:"FBI 線索專線",updated:(d,n)=>`FBI 資料更新於 ${d}・共 ${n} 案`,
  q:"這是哪一類案件？",caseD:(i,n)=>`案件 ${i}/${n}`,caseE:i=>`案件 ${i}`,
- worth:p=>`+${p}`,more:p=>`🔎 再給一條線索 <small>→ 剩 +${p}</small>`,last:"最後一條線索了，快下判斷！",
+ worth:p=>`+${p}`,more:p=>`💡 看提示 <small>→ 剩 +${p}</small>`,last:"提示用過了，快下判斷！",noHint:"這題沒有提示，快下判斷！",
  right:p=>`✓ 破案！+${p}`,wrong:"✗ 這次沒猜中",was:"答案是",onList:"所屬名單：",
  tip:"見過這個人？向 FBI 提供線索 ↗",full:"完整公告",fbi:"FBI 官方頁面 ↗",next:"下一案 →",finish:"看結果 →",
  lgWanted:"起訴內容僅為指控，未經定罪前推定無罪。",
@@ -330,9 +333,11 @@ function heur(c){const k=c.k,H=S[L].h,o=[];
  if(k.lg)o.push(esc(H.lang((L==='zh'?k.lgz:k.lg).join(L==='zh'?'、':', '))));
  else if(k.oc)o.push(esc(H.work('\u0001'+k.oc.join(', ')+'\u0002')).replace('\u0001','<span lang="en" class="en">').replace('\u0002','</span>'));
  if(k.ex){const e=esc(k.ex).replace(/▇▇/g,'<mark aria-label="redacted">▇▇</mark>');o.push(esc(H.ex('\u0001')).replace('\u0001',`<span lang="en" class="en">${e}</span>`))}
- return o.slice(-5)}
+ return o.filter(x=>!/🗓️|💵/.test(x)).slice(-2)}
+function metaOf(c){const m=c.k&&c.k.mt;if(m&&m[L])return m[L];const k=c.k||{},o=[];if(k.y)o.push(L==='zh'?`${k.y/10|0}0 年代`:`${k.y/10|0}0s`);
+ const w=L==='zh'?(k.ofz?`FBI ${k.ofz}分局`:k.plz):(k.of?`FBI ${k.of}`:k.pl);if(w)o.push(w);o.push(k.rw?(L==='zh'?`懸賞最高 ${money(k.rw)}`:`Reward up to ${money(k.rw)}`):(L==='zh'?'未列懸賞':'No reward listed'));return o.join(' · ')}
 function cluesOf(c){const f=c.k&&c.k.cl&&c.k.cl[L];
- if(Array.isArray(f)){const v=f.filter(x=>typeof x==='string'&&x.trim()).slice(0,5);if(v.length>=3)return v.map(x=>esc(x).replace(/▇+/g,m=>`<mark aria-label="redacted">${m}</mark>`))}
+ if(Array.isArray(f)){const v=f.filter(x=>typeof x==='string'&&x.trim()).slice(0,2);if(v.length>=1)return v.map(x=>esc(x).replace(/▇+/g,m=>`<mark aria-label="redacted">${m}</mark>`))}
  return heur(c)}
 // ---- runs ----
 function docketIds(day){const r=rng('docket|'+day),cnt={},ids=[];
@@ -347,7 +352,7 @@ function pickEndless(){const seen=new Set(LS.get('la2_seen')||[]);const used=new
 function newDaily(){const day=today(),ids=docketIds(day),r=rng('opts|'+day);run={mode:'d',day,ids,opts:ids.map(id=>optsFor(BYID[id],r)),i:0,n:1,res:[]};save()}
 function newEndless(){run={mode:'e',ids:[],opts:[],i:0,n:1,res:[],lives:LIVES};addEndless();save()}
 function addEndless(){const id=pickEndless();run.ids.push(id);run.opts.push(optsFor(BYID[id]))}
-function save(){LS.set(run.mode==='d'?'la2_daily':'la2_endless',run)}
+function save(){LS.set(run.mode==='d'?'la3_daily':'la3_endless',run)}
 function cur(){return BYID[run.ids[run.i]]}
 function score(){return run.res.reduce((s,x)=>s+x.p,0)}
 function total(){return run.mode==='d'?run.ids.length:run.res.length}
@@ -362,10 +367,10 @@ function renderRound(fresh){
  const c=cur(),done=run.res.length>run.i,cl=cluesOf(c),N=cl.length;run.n=Math.max(1,Math.min(run.n,N));
  $('caseNo').textContent=run.mode==='d'?T('caseD')(run.i+1,run.ids.length):T('caseE')(run.i+1);
  $('ladder').innerHTML=cl.map((_,j)=>`<i${j<run.n?' class="on"':''}></i>`).join('');
- $('worth').textContent=T('worth')(PTS[run.n-1]);
+ $('worth').textContent=T('worth')(PTS[run.n-1]);$('meta').textContent=metaOf(c);
  $('clues').innerHTML=cl.slice(0,run.n).map((x,j)=>`<li class="${j===run.n-1?(fresh?'new':'new last'):''}"><b>${j+1}</b><span>${x}</span></li>`).join('');
  if(!fresh)$('clues').querySelectorAll('.new').forEach(e=>e.style.animation='none');
- const cb=$('clueBtn');if(run.n<N){cb.disabled=false;cb.innerHTML=T('more')(PTS[run.n])}else{cb.disabled=true;cb.textContent=T('last')}
+ const cb=$('clueBtn');if(run.n<N){cb.disabled=false;cb.innerHTML=T('more')(PTS[run.n])}else{cb.disabled=true;cb.textContent=N<2?T('noHint'):T('last')}
  $('opts').innerHTML=run.opts[run.i].map((b,j)=>`<button type="button" data-b="${b}" id="b${j}"><span aria-hidden="true">${j+1} </span>${esc(CAT[b][L])}</button>`).join('');
  $('opts').querySelectorAll('button').forEach(btn=>btn.onclick=()=>answer(btn.dataset.b));
  $('game').classList.toggle('done',done);
@@ -431,8 +436,8 @@ $('bookBtn').onclick=openBook;$('book2Btn').onclick=openBook;
 // ---- end ----
 function finish(){const seen=new Set(LS.get('la2_seen')||[]);run.ids.forEach(i=>seen.add(i));LS.set('la2_seen',[...seen].slice(-500));
  if(run.mode==='d'){const days=new Set(LS.get('la2_days')||[]);days.add(run.day);LS.set('la2_days',[...days].sort().slice(-400));
-  const res=LS.get('la2_dres')||{};res[run.day]={res:run.res,ids:run.ids};LS.set('la2_dres',res);run.fin=1;save()}
- else{const b=LS.get('la2_best')||0;run.best=b;if(score()>b)LS.set('la2_best',score());LS.del('la2_endless')}
+  const res=LS.get('la3_dres')||{};res[run.day]={res:run.res,ids:run.ids};LS.set('la3_dres',res);run.fin=1;save()}
+ else{const b=LS.get('la3_best')||0;run.best=b;if(score()>b)LS.set('la3_best',score());LS.del('la3_endless')}
  lastEnd=run;show('end');renderEnd()}
 function streak(){const days=new Set(LS.get('la2_days')||[]);let n=0;const d=new Date();if(!days.has(today()))d.setDate(d.getDate()-1);
  for(;;){const s=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');if(!days.has(s))break;n++;d.setDate(d.getDate()-1)}return n}
@@ -458,21 +463,21 @@ $('shareBtn').onclick=async()=>{const r=lastEnd,sc=score();let txt;
  try{await navigator.clipboard.writeText(txt+'\n'+url);$('toast').textContent=T('copied')}catch(e){$('toast').textContent=txt}setTimeout(()=>$('toast').textContent='',2500)};
 $('againBtn').onclick=()=>start('e',false);
 // ---- start ----
-function renderStart(){const day=today(),dn=dayNo(day),d=LS.get('la2_daily'),res=(LS.get('la2_dres')||{})[day];
+function renderStart(){const day=today(),dn=dayNo(day),d=LS.get('la3_daily'),res=(LS.get('la3_dres')||{})[day];
  if(res){const p=res.res.reduce((s,x)=>s+x.p,0);$('dailyBtn').innerHTML=T('dailyDone')(dn,p)}
  else if(d&&d.day===day&&d.res.length)$('dailyBtn').innerHTML=T('dailyRes')(dn,d.i);
  else $('dailyBtn').innerHTML=T('daily')(dn);
- $('endlessBtn').innerHTML=T('endless')(LS.get('la2_best')||0);
+ $('endlessBtn').innerHTML=T('endless')(LS.get('la3_best')||0);
  const b=(LS.get('la2_book')||[]).length,nc=DATA?newClosed():0;$('bookBtn').innerHTML=esc(T('bookB')(b))+(nc?`<span class="dot" aria-label="${nc} ${L==='zh'?'案已不在名單上':'no longer listed'}">${nc}</span>`:'')}
 async function start(mode,fromBtn){
  show('game');$('loading').hidden=false;$('retryBtn').hidden=true;$('loading').firstElementChild.textContent=T('loading');
  $('game').classList.add('wait');$('game').classList.remove('done');$('opts').innerHTML='';$('hud').textContent='';
  try{await (loadP||boot())}catch(e){loadP=null;$('loading').firstElementChild.textContent=T('loadFail');$('retryBtn').hidden=false;$('retryBtn').onclick=()=>start(mode);return}
  $('loading').hidden=true;$('game').classList.remove('wait');
- if(mode==='d'){const day=today(),res=(LS.get('la2_dres')||{})[day];
-  if(res){const d=LS.get('la2_daily');lastEnd=d&&d.day===day?d:{mode:'d',day,ids:res.ids,res:res.res};show('end');renderEnd();return}
-  const d=LS.get('la2_daily');if(d&&d.day===day&&d.ids.every(i=>BYID[i]))run=d;else newDaily()}
- else{const e=LS.get('la2_endless');if(e&&e.lives>0&&e.ids.every(i=>BYID[i]))run=e;else newEndless()}
+ if(mode==='d'){const day=today(),res=(LS.get('la3_dres')||{})[day];
+  if(res){const d=LS.get('la3_daily');lastEnd=d&&d.day===day?d:{mode:'d',day,ids:res.ids,res:res.res};show('end');renderEnd();return}
+  const d=LS.get('la3_daily');if(d&&d.day===day&&d.ids.every(i=>BYID[i]))run=d;else newDaily()}
+ else{const e=LS.get('la3_endless');if(e&&e.lives>0&&e.ids.every(i=>BYID[i]))run=e;else newEndless()}
  renderRound(true);$('b0')&&$('b0').focus({preventScroll:true})}
 $('dailyBtn').onclick=()=>start('d');$('endlessBtn').onclick=()=>start('e');
 $('logo').onclick=()=>{closeDlg();show('start');renderStart()};
