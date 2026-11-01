@@ -324,16 +324,26 @@ def cache_images(cases, prev_ids):
     import io
     os.makedirs(IMG, exist_ok=True)
     keep = set()
+    # portraits fbi.gov failed to serve: wait a week before asking again
+    FAILF = os.path.join(os.path.dirname(IMG), 'img_failed.json')
+    try: failed = json.load(open(FAILF))
+    except Exception: failed = {}
+    today = datetime.date.today()
+    ids = {c['id'] for c in cases}
+    failed = {k: v for k, v in failed.items() if k in ids}
     for c in cases:
         fn = c['id'] + '.webp'; p = os.path.join(IMG, fn)
         if os.path.exists(p) and os.path.getsize(p) > 400:
             c['im'] = 'img/' + fn; keep.add(fn); continue
         if REQ['img'] >= MAX_IMG: continue   # rest next day
+        if c['id'] in failed and (today - datetime.date.fromisoformat(failed[c['id']])).days < 7: continue
         data, ct = get(c['img'], tries=2, kind='img')
         time.sleep(1.0)
         if not (data and ct.startswith('image/')) and c.get('img2') and c['img2'] != c['img']:
             data, ct = get(c['img2'], tries=1, kind='img'); time.sleep(1.0)
-        if not (data and ct.startswith('image/')): continue
+        if not (data and ct.startswith('image/')):
+            failed[c['id']] = today.isoformat(); continue
+        failed.pop(c['id'], None)
         try:
             im = Image.open(io.BytesIO(data)); im = im.convert('RGB')
             im.thumbnail((300, 380))
@@ -341,6 +351,7 @@ def cache_images(cases, prev_ids):
             c['im'] = 'img/' + fn; keep.add(fn)
         except Exception as e:
             print('img fail', c['id'], e, file=sys.stderr)
+    json.dump(failed, open(FAILF, 'w'), indent=0, sort_keys=True)
     for f in os.listdir(IMG):
         if f not in keep:
             os.remove(os.path.join(IMG, f))
@@ -374,7 +385,7 @@ def main():
     if old:
         try:
             o = json.loads(old); o['updated'] = out['updated']
-            if json.dumps(o, ensure_ascii=False, separators=(',', ':')) == s:
+            if o == json.loads(s):
                 print('no change; requests api=%d img=%d' % (REQ['api'], REQ['img'])); return 0
         except ValueError: pass
     open(OUT, 'w').write(s)

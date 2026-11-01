@@ -47,5 +47,5 @@ const q=new URLSearchParams(location.search).get('lang');let s=null;try{s=JSON.p
 const zh=q?/^zh/i.test(q):s?s==='zh':(navigator.languages||[navigator.language||'']).some(l=>/^zh/i.test(l))&&!/^en/i.test((navigator.languages||[''])[0]);
 document.getElementById(zh?'zh':'en').classList.add('on');document.documentElement.lang=zh?'zh-Hant':'en';
 if(zh){document.title='關於 · 再看一眼 🔎';document.getElementById('back').textContent='← 再看一眼';document.getElementById('back').href='./?lang=zh-Hant'}else document.getElementById('back').href='./?lang=en';
-fetch('cases.json',{cache:'no-cache'}).then(r=>r.json()).then(d=>{const t=d.updated.slice(0,10);document.getElementById('updEn').textContent=`Last refresh: ${t} UTC, ${d.n} cases.`;document.getElementById('updZh').textContent=`最近更新：${t}（UTC），共 ${d.n} 案。`}).catch(()=>{});
+fetch('cases.json',{cache:'no-cache'}).then(r=>r.json()).then(d=>{const t=d.updated.slice(0,10);document.getElementById('updEn').textContent=`Data last changed: ${t} UTC, ${d.n} cases.`;document.getElementById('updZh').textContent=`資料最近更新：${t}（UTC），共 ${d.n} 案。`}).catch(()=>{});
 </script></body></html>
