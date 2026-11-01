@@ -166,7 +166,10 @@ def _ok_pair(e, z, names):
     e, z = str(e).strip(), str(z).strip()
     return bool(e and z) and not _bad_en(e, names) and not ZH_BAD.search(z) and len(z) <= 60 and not re.search(r'9{2},?9{3}', e + z)
 
-def meta_line(k):
+def meta_line(k, m=None):
+    # m = clues2.json meta; its reward is parsed from the poster's reward text (never the 99999 placeholders)
+    if isinstance(m, dict) and 'reward' in m:
+        k = dict(k, rw=m['reward'] if isinstance(m['reward'], (int, float)) and m['reward'] > 0 else 0)
     en, zh = [], []
     if k.get('y'): d = k['y'] // 10 * 10; en.append('%ds' % d); zh.append('%d 年代' % d)
     if k.get('of'): en.append('FBI %s' % k['of']); zh.append('FBI %s分局' % k['ofz'])
@@ -211,7 +214,9 @@ def two_clues(c, names):
 def add_clues(c, names=None):
     names = names if names is not None else set()
     c['k']['cl'], c['k']['cs'] = two_clues(c, names)
-    c['k']['mt'] = meta_line(c['k'])
+    if HAND2 is None: _h2 = _load_hand2()
+    else: _h2 = HAND2
+    c['k']['mt'] = meta_line(c['k'], (_h2.get(c['id']) or {}).get('meta'))
 
 # ONE switch for missing-person cases (FBI "Kidnappings and Missing Persons" / ViCAP missing). The game
 # adapts automatically (daily mix, options, end-screen stats). Env LA_INCLUDE_MISSING=0 overrides for a test run.
