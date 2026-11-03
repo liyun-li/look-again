@@ -23,6 +23,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);display:flex;
 .h1{flex:1 1 0;min-width:0;margin:0;font:inherit;display:flex}.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .logo{flex:1 1 0;min-width:0;font:900 clamp(.78rem,4vw,1.1rem)/1.1 var(--mono);letter-spacing:.06em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:none;border:0;text-align:left;color:var(--ink)}
 .logo b{color:var(--amb)}
+@media (max-width:300px){html:not([lang^=zh]) .logo{font-size:3.3vw}}
 .pill{flex:0 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font:800 clamp(.62rem,3vw,.85rem) var(--mono);border:1px solid #ffffff40;border-radius:999px;padding:.25em .6em}
 .pill:empty{display:none}
 .pill.pop{animation:pop .35s}
@@ -86,7 +87,8 @@ a{color:var(--lnk)}
 .rname{font:900 clamp(.76rem,min(4vw,2.5dvh),1.05rem)/1.15 var(--mono);overflow-wrap:anywhere}
 .rcat{font-weight:800;font-size:clamp(.7rem,min(3.6vw,2.3dvh),.92rem)}
 .badge{display:inline-block;background:#1d1b17;color:var(--amb);border-radius:.25rem;font:800 .72em var(--sans);padding:.05em .4em;margin-top:.1em}
-.rd{font-size:clamp(.64rem,min(3.3vw,2.1dvh),.85rem);color:#4b453a;line-height:1.3;overflow:hidden;flex:1 1 0;min-height:0}
+.rd{font-size:clamp(.64rem,min(3.3vw,2.1dvh),.85rem);color:#4b453a;line-height:1.3;overflow:hidden auto;scrollbar-width:none;overscroll-behavior:contain;flex:1 1 0;min-height:0}
+.rd::-webkit-scrollbar{display:none}
 .legal{font-size:clamp(.56rem,min(2.9vw,1.8dvh),.74rem);color:#5e5646;flex:none;line-height:1.25}
 .racts{display:flex;flex-wrap:wrap;gap:.3rem;flex:none}
 .racts a,.racts button{flex:1 1 auto;text-align:center;text-decoration:none;font-weight:800;font-size:clamp(.64rem,min(3.3vw,2.1dvh),.84rem);border-radius:.45rem;padding:clamp(.28rem,.9dvh,.5rem) .45rem;border:1px solid #0004;background:none;color:#1d1b17}
