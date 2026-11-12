@@ -491,6 +491,13 @@ def cache_images(cases, prev_ids):
             os.remove(os.path.join(IMG, f))
     for c in cases: c.pop('img', None); c.pop('img2', None)   # clients never touch fbi.gov images
 
+def _faces(cases):
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import faces
+        print('clear faces', faces.mark(cases))
+    except Exception as e:
+        print('face check skipped', e, file=sys.stderr)
+
 def main():
     items = []; page = 1; total = None
     while True:
@@ -510,6 +517,7 @@ def main():
     print('requests so far: api=%d' % REQ['api'])
     if '--no-images' not in sys.argv:
         cache_images(cases, None); cases = [c for c in cases if c.get('im')]
+    _faces(cases)
     mix = {}
     for c in cases: mix[c['c']] = mix.get(c['c'], 0) + 1
     out = {'updated': datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%MZ'), 'total': total,
@@ -537,6 +545,7 @@ if __name__ == '__main__':
         for c in d['cases']:
             c['k']['rw'] = reward_amt({'reward_max': c['k'].get('rw') or 0, 'reward_text': c['r'].get('rw') or ''})
             add_clues(c, names_of({'title': c['title']}))
+        _faces(d['cases'])
         open(OUT, 'w').write(json.dumps(d, ensure_ascii=False, separators=(',', ':')))
         print('reclued', len(d['cases']), 'sources', {x: sum(c['k']['cs'] == x for c in d['cases']) for x in '2lf'}); sys.exit(0)
     if '--from' in sys.argv:

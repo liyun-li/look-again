@@ -1,0 +1,8 @@
+# Case ids whose portrait is too weak for a face-first round (sketch, covered face, tiny full-body, faded scan). Reviewed by hand 2026-11-12.
+275136bf2d134228a086aaedc4ec231f
+fc2e50719a332e9d7856d94d5e5fc5d1
+5187b47ed74c4cd69afeef4fe8e01ccf
+a7a9c7e0f2534d888a4b9d63401360b4
+979e47690e244deba3e2b9d926e5316f
+78101bc9204745b782e0c1476d97c4ad
+2f29ae89310c95494df8920b75d63995
