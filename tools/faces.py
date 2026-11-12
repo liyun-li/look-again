@@ -4,6 +4,7 @@ signatures in face_refs.json; tiny files and hand-reviewed weak portraits (face_
 import os, json
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
+NEVER = {'missing', 'parental', 'seeking'}
 
 def _load():
     refs = json.load(open(os.path.join(HERE, 'face_refs.json')))
@@ -23,7 +24,7 @@ def mark(cases):
     for c in cases:
         c.pop('fq', None)
         im = c.get('im')
-        if not im or c['id'] in skip: continue
+        if not im or c['id'] in skip or c.get('c') in NEVER: continue   # victims / missing people are never game rounds
         p = os.path.join(ROOT, im)
         if not os.path.exists(p) or os.path.getsize(p) < 2000: continue
         try: s = Image.open(p).convert('RGB').resize((16, 16)).tobytes()
