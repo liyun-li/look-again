@@ -268,6 +268,22 @@ function chargeOf(c){const r=c.r||{};const d=String(r.d||'').trim();let parts=d?
  zs.sort((a,b)=>CHG.findIndex(x=>x[1]===a)-CHG.findIndex(x=>x[1]===b));
  return {head:clip(head,150),more,q:/^wanted for questioning/i.test(head),zh:zs.slice(0,3).join('、')}}
 
+// anonymous play stats: whitelisted game events to our own counter. No cookies, no personal data, no fingerprinting.
+// Ids are random strings made here (localStorage/sessionStorage). Off when not on liyun-li.github.io and for untagged automation.
+const STAT=(()=>{const EP='https://game-stats.coach-backend.workers.dev/e',SRC='la';
+ const rid=()=>{try{const a=new Uint8Array(12);crypto.getRandomValues(a);return Array.from(a,b=>(b%36).toString(36)).join('')}catch(e){return (Math.random().toString(36).slice(2)+'000000').slice(0,12)}};
+ let ls=null,ss=null;try{ls=localStorage;ss=sessionStorage}catch(e){}
+ const g=(s,k)=>{try{return s?s.getItem(k):null}catch(e){return null}},p=(s,k,v)=>{try{if(s){v==null?s.removeItem(k):s.setItem(k,v)}}catch(e){}};
+ try{const q=new URLSearchParams(location.search);if(q.has('t')){const t=(q.get('t')||'').toLowerCase();p(ls,'stats_t',/^[a-z0-9_-]{1,16}$/.test(t)&&t!=='off'?t:null)}}catch(e){}
+ let u=g(ls,'stats_u_'+SRC);const had=!!u||!!g(ls,'la2_seen')||!!g(ls,'la4_daily')||!!g(ls,'la4_best');
+ if(!u){u=rid();p(ls,'stats_u_'+SRC,u)}
+ let sid=g(ss,'stats_s_'+SRC),r=g(ss,'stats_r_'+SRC);if(!sid){sid=rid();r=had?'1':'0';p(ss,'stats_s_'+SRC,sid);p(ss,'stats_r_'+SRC,r)}
+ const tag=()=>g(ls,'stats_t')||'';
+ function send(e,o){try{const t=tag();if(location.hostname!=='liyun-li.github.io'||(navigator.webdriver&&!t))return;
+  const b=JSON.stringify(Object.assign({s:SRC,u,i:sid,r:r==='1'?1:0,t,l:typeof L==='string'?L:'',e},o||{}));
+  if(navigator.sendBeacon&&navigator.sendBeacon(EP,b))return;fetch(EP,{method:'POST',body:b,keepalive:true,credentials:'omit'}).catch(()=>{})}catch(e){}}
+ return {send,rid}})();
+
 const PTS=[3,1],LIVES=3,DOCKET=5,EPOCH=Date.UTC(2026,10,2),GUARD=350;
 // FBI list -> game category. Missing persons, parental kidnapping and "seeking information" files are never scored.
 const GMAP={violent:'violent',topten:'violent',gangs:'gangs',money:'money',cyber:'cyber',spy:'spy',terror:'terror'};
@@ -392,9 +408,10 @@ function pickEndless(){const seen=new Set(LS.get('la2_seen')||[]);const used=new
  const gs=GROUPS.filter(g=>(POOL[g]||[]).length);const last=run&&run.ids.length?grp(BYID[run.ids[run.ids.length-1]]):null;
  let g=gs[Math.random()*gs.length|0];if(g===last&&gs.length>1)g=gs[Math.random()*gs.length|0];
  let p=POOL[g].filter(c=>!seen.has(c.id)&&!used.has(c.id));if(!p.length)p=POOL[g].filter(c=>!used.has(c.id));if(!p.length)p=POOL[g];return p[Math.random()*p.length|0].id}
-function newDaily(){const day=today(),ids=docketIds(day),r=rng('fopts|'+day);run={mode:'d',day,ids,opts:ids.map(id=>optsFor(BYID[id],r)),i:0,pk:0,res:[]};save()}
-function newEndless(){run={mode:'e',ids:[],opts:[],i:0,pk:0,res:[],lives:LIVES};addEndless();save()}
+function newDaily(){const day=today(),ids=docketIds(day),r=rng('fopts|'+day);run={mode:'d',day,ids,opts:ids.map(id=>optsFor(BYID[id],r)),i:0,pk:0,res:[],x:STAT.rid()};save()}
+function newEndless(){run={mode:'e',ids:[],opts:[],i:0,pk:0,res:[],lives:LIVES,x:STAT.rid()};addEndless();save()}
 function addEndless(){const id=pickEndless();run.ids.push(id);run.opts.push(optsFor(BYID[id]))}
+const MODE=r=>r.mode==='d'?'daily':'endless';
 function save(){LS.set(run.mode==='d'?'la4_daily':'la4_endless',run)}
 function cur(){return BYID[run.ids[run.i]]}
 function score(r=run){return r.res.reduce((s,x)=>s+x.p,0)}
@@ -428,7 +445,7 @@ function renderRound(fresh){
 function peek(){if(!run||run.res.length>run.i||run.pk||!clueOf(cur()).length)return;run.pk=1;save();renderRound(false);bump($('worth'));if(navigator.vibrate)try{navigator.vibrate(8)}catch(e){}}
 $('peekBtn').onclick=peek;
 function answer(b){if(!run||run.res.length>run.i||Date.now()-tGuard<GUARD)return;const c=cur(),ok=grpSet(c).has(b),p=ok?PTS[run.pk?1:0]:0;
- run.res.push({b,n:run.pk?2:1,ok,p,g:grp(c)});if(run.mode==='e'&&!ok)run.lives--;save();addBook(c,ok,p);tGuard=Date.now();
+ STAT.send('round',{m:MODE(run),x:run.x,n:run.i,k:ok?1:0,h:run.pk?1:0});run.res.push({b,n:run.pk?2:1,ok,p,g:grp(c)});if(run.mode==='e'&&!ok)run.lives--;save();addBook(c,ok,p);tGuard=Date.now();
  $('game').classList.add('done');renderReveal(false);hud();bump($('hud'));if(navigator.vibrate)try{navigator.vibrate(ok?[15,30,15]:[40])}catch(e){}}
 function renderReveal(re){const c=cur(),x=run.res[run.i],g=grp(c),ch=chargeOf(c);
  $('worth').hidden=true;
@@ -489,7 +506,7 @@ function finish(){const seen=new Set(LS.get('la2_seen')||[]);run.ids.forEach(i=>
  if(run.mode==='d'){const days=new Set(LS.get('la2_days')||[]);days.add(run.day);LS.set('la2_days',[...days].sort().slice(-400));
   const res=LS.get('la4_dres')||{};res[run.day]={res:run.res,ids:run.ids};LS.set('la4_dres',res);run.fin=1;save()}
  else{const b=LS.get('la4_best')||0;run.best=b;if(score()>b)LS.set('la4_best',score());LS.del('la4_endless')}
- lastEnd=run;show('end');renderEnd()}
+ STAT.send('end',{m:MODE(run),x:run.x,n:run.res.length,v:score()});lastEnd=run;show('end');renderEnd()}
 function streak(){const days=new Set(LS.get('la2_days')||[]);let n=0;const d=new Date(Date.now()+8*36e5);if(!days.has(today()))d.setUTCDate(d.getUTCDate()-1);
  for(;;){const s=d.toISOString().slice(0,10);if(!days.has(s))break;n++;d.setUTCDate(d.getUTCDate()-1)}return n}
 function sq(x){return x.ok?(x.n>1?'🟨':'🟩'):'🟥'}
@@ -516,7 +533,7 @@ function renderHelp(day){if(!MISSING.length){$('help').hidden=true;return}$('hel
  if(!helpPick||helpPick.k!==(day||'e')){const p=MISSING.slice();shuf(p,day?rng('help|'+day):Math.random);helpPick={k:day||'e',ids:p.slice(0,3).map(c=>c.id)}}
  $('hf').innerHTML=helpPick.ids.map(id=>BYID[id]).filter(Boolean).map(c=>{const k=c.k,pl=L==='zh'?k.plz:k.pl;const m=[k.y?T('since')(k.y):'',pl||''].filter(Boolean).join(' · ');
   return `<div class="hfc"><a href="${esc(c.url)}" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true"><img src="${esc(c.im)}" alt="" loading="lazy"></a><a class="n" href="${esc(c.url)}" target="_blank" rel="noopener" lang="en">${esc(titleCase(nameOf(c)))}</a><span class="m">${esc(m)}</span><a class="t" href="https://tips.fbi.gov/" target="_blank" rel="noopener" aria-label="${esc(T('tipS'))} ${esc(titleCase(nameOf(c)))}">${esc(T('tipS'))}</a></div>`}).join('')}
-$('shareBtn').onclick=async()=>{const r=lastEnd,sc=score(r);let txt;const s=surprise(r);const sline=s?`😳 ${CAT[s.b].e}→${CAT[s.g].e}`:'';
+$('shareBtn').onclick=async()=>{const r=lastEnd,sc=score(r);STAT.send('share',{m:MODE(r),x:r.x||''});let txt;const s=surprise(r);const sline=s?`😳 ${CAT[s.b].e}→${CAT[s.g].e}`:'';
  if(r.mode==='d'){txt=T('sh')(dayNo(r.day),rightN(r),r.res.length)+'\n'+r.res.map(sq).join('');if(sline)txt+='\n'+sline;const st=streak();if(st>1)txt+='\n'+T('shStreak')(st)}
  else{txt=T('shE')(sc,r.res.length)+'\n'+r.res.map(sq).join('');if(sline)txt+='\n'+sline}
  const url='https://liyun-li.github.io/look-again/?daily';
@@ -539,6 +556,7 @@ async function start(mode){
   if(res){const d=LS.get('la4_daily');lastEnd=d&&d.day===day?d:{mode:'d',day,ids:res.ids,res:res.res};show('end');renderEnd();return}
   const d=LS.get('la4_daily');if(d&&d.day===day&&d.ids.every(i=>BYID[i]))run=d;else newDaily()}
  else{const e=LS.get('la4_endless');if(e&&e.lives>0&&e.ids.every(i=>BYID[i]))run=e;else newEndless()}
+ if(!run.x){run.x=STAT.rid();save()}STAT.send('start',{m:MODE(run),x:run.x,n:run.i});
  renderRound(true);$('b0')&&$('b0').focus({preventScroll:true})}
 $('dailyBtn').onclick=()=>start('d');$('endlessBtn').onclick=()=>start('e');
 $('logo').onclick=()=>{closeDlg();show('start');renderStart()};
@@ -558,7 +576,7 @@ addEventListener('keydown',e=>{if($('dlg').open||!$('game').classList.contains('
  if(n>=0&&$('b'+n)&&!$('game').classList.contains('done'))$('b'+n).click();
  else if((e.key==='p'||e.key==='P')&&!$('game').classList.contains('done')){e.preventDefault();peek()}
  else if(e.key==='Enter'&&$('game').classList.contains('done')&&document.activeElement===document.body)$('next').click()});
-applyLang();
+applyLang();STAT.send('view');
 if(/(^|[?&])daily\b/.test(location.search.slice(1)))start('d');
 </script>
 <!--howto--><script>(()=>{const D={"en": {"title": "🔎 Look Again", "steps": ["A real FBI wanted poster. Just the face.", "Guess what they’re wanted for. One tap.", "Gut call: +3. After a 💡 peek at a clue: +1."], "example": "<style>@media (orientation:landscape) and (max-height:520px){.mx-look{display:none}}</style><div class=\"mx-look\"><div aria-hidden=\"true\" style=\"display:flex;gap:.6em;align-items:stretch;font-size:.85em\">\n<div style=\"flex:none;width:4.2em;aspect-ratio:3/4;border-radius:.45em;background:#ece6d6;color:#1d1b17;display:flex;align-items:center;justify-content:center;font:900 1.9em system-ui,sans-serif;position:relative\">?<span style=\"position:absolute;top:.25em;right:.25em;background:#f0b429;color:#111;border-radius:999px;font-size:.36em;padding:0 .45em\">+3</span></div>\n<div style=\"flex:1;display:grid;grid-template-columns:1fr 1fr;gap:.35em;align-content:center\"><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">🔪 Violent</span><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">💸 Fraud</span><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">💻 Hacking</span><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">💣 Terror</span></div></div></div>"}, "zh": {"title": "🔎 再看一眼", "steps": ["一張真實的 FBI 通緝照，只看臉。", "猜猜這個人為什麼被通緝，點一下就好。", "憑直覺猜中 +3；偷看 💡 線索再猜中 +1。"], "example": "<style>@media (orientation:landscape) and (max-height:520px){.mx-look{display:none}}</style><div class=\"mx-look\"><div aria-hidden=\"true\" style=\"display:flex;gap:.6em;align-items:stretch;font-size:.85em\">\n<div style=\"flex:none;width:4.2em;aspect-ratio:3/4;border-radius:.45em;background:#ece6d6;color:#1d1b17;display:flex;align-items:center;justify-content:center;font:900 1.9em system-ui,sans-serif;position:relative\">?<span style=\"position:absolute;top:.25em;right:.25em;background:#f0b429;color:#111;border-radius:999px;font-size:.36em;padding:0 .45em\">+3</span></div>\n<div style=\"flex:1;display:grid;grid-template-columns:1fr 1fr;gap:.35em;align-content:center\"><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">🔪 暴力</span><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">💸 詐騙</span><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">💻 駭客</span><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">💣 恐攻</span></div></div></div>"}},K="howto_la4",UI={en:{ok:"Got it",q:"How to play"},zh:{ok:"懂了",q:"怎麼玩"}};
