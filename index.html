@@ -2,11 +2,11 @@
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Look Again 🔎 Guess the crime</title>
-<meta name="description" content="Real FBI wanted posters. Look at the face, guess the crime. Your gut is about to be wrong.">
+<meta name="description" content="Real U.S. wanted posters from the FBI, DEA, Secret Service and U.S. Marshals. Look at the face, guess the crime. Your gut is about to be wrong.">
 <meta name="theme-color" content="#121519">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23121519'/%3E%3Ccircle cx='14' cy='14' r='7' fill='none' stroke='%23f0b429' stroke-width='3'/%3E%3Cpath d='M19 19l7 7' stroke='%23f0b429' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E">
 <meta property="og:type" content="website"><meta property="og:url" content="https://liyun-li.github.io/look-again/">
-<meta property="og:title" content="Look Again 🔎"><meta property="og:description" content="Look at the face. Guess the crime. Real FBI wanted posters.">
+<meta property="og:title" content="Look Again 🔎"><meta property="og:description" content="Look at the face. Guess the crime. Real U.S. wanted posters.">
 <meta property="og:image" content="https://liyun-li.github.io/look-again/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="Look Again: a redacted FBI case file and a magnifying glass.">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://liyun-li.github.io/look-again/og.png">
 <style>
@@ -50,7 +50,7 @@ a{color:var(--lnk)}
 #game{display:none;flex-direction:column;gap:clamp(.3rem,1.1dvh,.6rem);flex:1 1 0;min-height:0}
 #game.on{display:flex}
 .poster{flex:1 1 0;min-height:0;display:flex;justify-content:center;align-items:stretch;position:relative}
-.pic{position:relative;height:100%;max-width:100%;aspect-ratio:3/4;background:var(--pap);border-radius:.6rem;overflow:hidden;box-shadow:0 .35rem 0 #0007,0 0 0 clamp(.2rem,1vw,.35rem) var(--pap);display:flex;align-items:center;justify-content:center;color:#5e5646;font:700 .8rem var(--sans)}
+.pic{position:relative;height:100%;width:100%;max-width:100%;background:var(--pap);border-radius:.6rem;overflow:hidden;box-shadow:0 .35rem 0 #0007,0 0 0 clamp(.2rem,1vw,.35rem) var(--pap);display:flex;align-items:center;justify-content:center;color:#5e5646;font:700 .8rem var(--sans)}
 .pic>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 22%;display:block;background:#d9d1bd}
 .pic.pop{animation:popin .35s cubic-bezier(.2,.9,.3,1.25)}
 #game.wait .pic{visibility:hidden}
@@ -72,7 +72,10 @@ a{color:var(--lnk)}
 .peek[disabled]{border-style:solid;border-color:#ffffff30;color:var(--mut);cursor:default}
 .opts{display:grid;grid-template-columns:1fr 1fr;gap:clamp(.3rem,1dvh,.5rem)}
 .opts button{min-width:0;display:flex;align-items:center;gap:.45em;text-align:left;background:var(--bg2);border:1px solid #ffffff38;border-radius:.65rem;padding:clamp(.35rem,1.3dvh,.7rem) .55rem;font-weight:800;font-size:clamp(.78rem,min(4vw,2.55dvh),1.02rem);line-height:1.15;min-height:clamp(2.6rem,8dvh,3.8rem);box-shadow:0 .2rem 0 #0008;transition:transform .08s}
+.opts button:last-child:nth-child(odd){grid-column:1/-1;justify-content:center}
+.opts.n2 button{min-height:clamp(3rem,11dvh,4.6rem);font-size:clamp(.86rem,min(4.6vw,2.9dvh),1.12rem)}
 .opts .e{font-size:1.45em;flex:none;line-height:1}
+.rcat .also{font-size:.72em;font-weight:800;white-space:normal}
 .opts .t{min-width:0;overflow-wrap:anywhere}
 .opts button:active,.peek:active,.next:active,.cta:active,.ghost:active{transform:translateY(2px) scale(.98)}
 /* reveal */
@@ -98,8 +101,13 @@ html[lang^=zh] .rhead .en{font-weight:600;font-size:.86em;color:#4b453a;-webkit-
 .next{background:#1d1b17;color:var(--pap);border:0;border-radius:.6rem;font-weight:900;font-size:clamp(1rem,min(5.4vw,3.4dvh),1.3rem);padding:clamp(.45rem,1.5dvh,.75rem);box-shadow:0 .2rem 0 #0006}
 .loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.6rem;font:800 .9rem var(--mono);color:var(--mut);z-index:3}
 /* end */
-#end{gap:clamp(.3rem,1.2dvh,.7rem);justify-content:flex-start}
-.eres{display:flex;flex-direction:column;align-items:center;gap:clamp(.2rem,1dvh,.55rem);width:100%;max-width:26rem;flex:none;margin-top:auto}
+#end{gap:clamp(.3rem,1.2dvh,.7rem);justify-content:space-evenly}
+.eres{display:flex;flex-direction:column;align-items:center;gap:clamp(.25rem,1.3dvh,.75rem);width:100%;max-width:26rem;flex:none}
+.faces{display:flex;gap:clamp(.2rem,1.5vw,.4rem);justify-content:center;width:100%}
+.faces .fc{position:relative;flex:0 1 4.6rem;min-width:0;aspect-ratio:3/4;max-height:13dvh;border-radius:.4rem;overflow:hidden;background:#d9d1bd;border:3px solid var(--red)}
+.faces .fc.ok{border-color:var(--grn)}.faces .fc.hint{border-color:var(--amb)}
+.faces img{width:100%;height:100%;object-fit:cover;object-position:50% 22%;display:block}
+.faces i{position:absolute;left:0;right:0;bottom:0;font-style:normal;font-size:clamp(.7rem,min(3.6vw,2.2dvh),.95rem);line-height:1.3;text-align:center;background:#000a}
 .gutT{font:900 clamp(.7rem,min(3.6vw,2.3dvh),.9rem) var(--mono);letter-spacing:.12em;color:var(--amb)}
 .srow{display:flex;align-items:center;gap:.7rem}
 .score{font:900 clamp(2.2rem,min(15vw,8.5dvh),4.2rem)/1 var(--mono)}
@@ -110,7 +118,7 @@ html[lang^=zh] .rhead .en{font-weight:600;font-size:.86em;color:#4b453a;-webkit-
 .grid{font-size:clamp(1rem,min(6vw,3.4dvh),1.5rem);letter-spacing:.12em;line-height:1.1;overflow-wrap:anywhere;max-width:100%}
 .mis{font-weight:800;font-size:clamp(.78rem,min(4vw,2.5dvh),1rem);line-height:1.25}
 .sur{display:flex;gap:.6rem;align-items:center;text-align:left;background:var(--pap);color:var(--pink);border-radius:.6rem;padding:clamp(.3rem,1dvh,.5rem);width:100%}
-.sur img{width:clamp(2.6rem,9dvh,4.2rem);aspect-ratio:3/4;object-fit:cover;object-position:50% 22%;border-radius:.35rem;flex:none;background:#d9d1bd}
+.sur img{width:clamp(2.6rem,11dvh,5.4rem);aspect-ratio:3/4;object-fit:cover;object-position:50% 22%;border-radius:.35rem;flex:none;background:#d9d1bd}
 .sur div{display:flex;flex-direction:column;gap:.1rem;min-width:0;font-size:clamp(.7rem,min(3.6vw,2.25dvh),.92rem);line-height:1.25}
 .sur b{font-weight:900}.sur span{font-weight:700}
 .sur a{color:#0b4f8f;font-weight:700;font-size:.85em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -119,7 +127,7 @@ html[lang^=zh] .rhead .en{font-weight:600;font-size:.86em;color:#4b453a;-webkit-
 .row{display:flex;gap:.4rem;flex-wrap:wrap;justify-content:center;align-items:center}
 #end .cta{padding:clamp(.32rem,1.2dvh,.65rem) clamp(1rem,6vw,2rem)}
 .iconb{padding-inline:.7rem}
-.help{width:100%;max-width:26rem;margin-bottom:auto;border:1px dashed #ffffff40;border-radius:.6rem;padding:clamp(.3rem,1dvh,.6rem) .6rem;display:flex;flex-direction:column;gap:clamp(.15rem,.7dvh,.4rem);min-height:0;flex:0 1 auto;overflow:hidden}
+.help{width:100%;max-width:26rem;border:1px dashed #ffffff40;border-radius:.6rem;padding:clamp(.3rem,1dvh,.6rem) .6rem;display:flex;flex-direction:column;gap:clamp(.15rem,.7dvh,.4rem);min-height:0;flex:0 1 auto;overflow:hidden}
 .help>*{flex:none}
 .help h2{font:900 clamp(.68rem,min(3.6vw,2.2dvh),.9rem) var(--sans);color:var(--amb)}
 .help p{font-size:clamp(.56rem,min(2.9vw,1.75dvh),.74rem);color:var(--mut);line-height:1.25}
@@ -155,8 +163,15 @@ dialog[open]{display:flex;flex-direction:column;animation:pop .25s}
 @media (orientation:landscape) and (max-height:559px){
  #game.on{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:minmax(0,1fr);gap:.6rem .9rem}
  .poster{height:100%}
+ .pic{width:auto;aspect-ratio:3/4}
  .side{justify-content:center;min-height:0;overflow:hidden}
- .rv{flex:0 1 auto}
+ .ask{flex:1 1 auto;justify-content:center;gap:clamp(.4rem,3dvh,1rem)}
+ .q{font-size:clamp(1rem,6.5dvh,1.75rem)}
+ .opts{gap:clamp(.35rem,2.4dvh,.8rem)}
+ .opts button{min-height:clamp(2.6rem,19dvh,6rem);font-size:clamp(.8rem,4.6dvh,1.15rem)}
+ .rv{flex:1 1 auto;justify-content:space-between}
+ .rcat{font-size:clamp(1.05rem,6.5dvh,1.7rem)}
+ .faces .fc{max-height:22dvh}
  .app{max-width:52rem}
  #end.on{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-content:center;align-items:center;column-gap:1rem}
  .eres{margin:0}.help{margin:0;max-height:100%}
@@ -196,7 +211,7 @@ body.ingame .foot,body.atend .foot{display:none}
  <div class="poster" id="poster">
   <div class="loading" id="loading" hidden><span data-t="loading"></span><button class="ghost" id="retryBtn" type="button" hidden data-t="retry"></button></div>
   <div class="pic" id="pic">
-   <div class="ptop" aria-hidden="true"><span class="wl">FBI · WANTED</span><span id="caseNo"></span></div>
+   <div class="ptop" aria-hidden="true"><span class="wl">CASE FILE</span><span id="caseNo"></span></div>
    <span class="worth" id="worth"></span>
    <span class="stamp" id="stamp" aria-hidden="true"></span>
    <p class="clue" id="clue" aria-live="polite" hidden></p>
@@ -223,7 +238,7 @@ body.ingame .foot,body.atend .foot{display:none}
  <div class="eres">
   <h2 class="gutT" id="gutT"></h2>
   <div class="srow"><div class="score" id="score"></div><div class="scol"><div class="rank" id="rank"></div><div class="scoreL" id="scoreL"></div></div></div>
-  <div class="grid" id="grid" aria-hidden="true"></div>
+  <div class="grid" id="grid" aria-hidden="true"></div><div class="faces" id="faces" aria-hidden="true" hidden></div>
   <p class="mis" id="mis"></p>
   <div class="sur" id="sur" hidden></div>
   <p class="bias" id="bias" hidden></p>
@@ -246,7 +261,7 @@ const CHG=[
  [/murder[- ]for[- ]hire/i,'買兇殺人'],[/murder|homicide|\bkill/i,'殺人'],[/war crimes/i,'戰爭罪'],[/hostage/i,'挾持人質'],[/kidnap|abduct/i,'綁架'],[/air(craft)? piracy/i,'劫機'],[/manslaughter/i,'過失致死'],
  [/narco-?terror/i,'毒品恐怖主義'],[/bomb|explosive|destructive device|weapons? of mass/i,'爆裂物'],[/material support/i,'資助恐怖組織'],[/terroris|\bterror\b|lethal plots/i,'恐怖主義'],[/sabotage/i,'蓄意破壞'],[/revolutionary guard|irgc|qods/i,'伊朗革命衛隊相關'],
  [/arson|by means of fire/i,'縱火'],[/robbery/i,'搶劫'],[/assault/i,'暴力傷害'],[/machine gun|firearm/i,'非法槍械'],
- [/racketeer|\brico\b/i,'集團犯罪（RICO）'],[/controlled substance|cocaine|heroin|methamphetamine|fentanyl|narcotic|marijuana|\bdrug|intent to distribute/i,'毒品'],
+ [/racketeer|(?<!puerto )\brico\b/i,'集團犯罪（RICO）'],[/controlled substance|cocaine|heroin|methamphetamine|fentanyl|narcotic|marijuana|\bdrug|intent to distribute/i,'毒品'],
  [/espionage|national defense information/i,'間諜'],[/agents? of a foreign government|foreign agent|illegal agent/i,'替外國政府做事'],[/trade secret/i,'竊取商業機密'],
  [/smuggl/i,'走私'],[/emergency economic powers|ieepa|export control|arms export|export information/i,'違反制裁與出口管制'],
  [/extortion|ransom|demand in relation to damaging/i,'勒索'],
@@ -286,22 +301,29 @@ const STAT=(()=>{const EP='https://game-stats.coach-backend.workers.dev/e',SRC='
  return {send,rid}})();
 
 const PTS=[3,1],LIVES=3,DOCKET=5,EPOCH=Date.UTC(2026,10,2),GUARD=350;
-// Categories = the FBI's own crime lists (cases.json g = answer, m = every category the case defensibly matches; built by tools/cats.py).
-// A round only ever shows the answer plus categories outside m, so two options can never both be right.
-// Missing persons, parental kidnapping and "seeking information" files have no g and are never scored.
-const GMAP={violent:'violent',topten:'violent',gangs:'gangs',money:'money',cyber:'cyber',spy:'spy',terror:'terror'};// legacy casebook entries only
-const GROUPS=['violent','gangs','money','cyber','spy','terror'];
-const SEV={violent:3,terror:3,gangs:2,spy:1,money:0,cyber:0};
+// Categories = the FBI's own crime lists (built by tools/cats.py). cases.json: ok = every category that counts as right
+// (each FBI list the poster is filed under, or what its FBI charge text names), g = the main one, m = every category the
+// case defensibly matches. A round shows ONE category from ok plus 1-3 from outside m, so a shown option is either
+// right or clearly wrong. Missing persons, parental kidnapping and victim / "seeking information" files are never scored;
+// "seeking information" posters about unknown SUSPECTS (sus) are.
+const GMAP={violent:'violent',topten:'violent',gangs:'gangs',money:'money',cyber:'cyber',spy:'spy',terror:'terror',drugs:'drugs'};// legacy casebook entries only
+const GROUPS=['violent','gangs','money','cyber','spy','terror','drugs'];
+const SEV={violent:3,terror:3,gangs:2,drugs:2,spy:1,money:0,cyber:0};
 const CAT={
  violent:{e:"🔪",en:"Violent crime",zh:"暴力犯罪"},
  gangs:{e:"🕴️",en:"Criminal enterprise",zh:"犯罪集團"},
  money:{e:"💸",en:"White-collar crime",zh:"白領犯罪"},
  cyber:{e:"💻",en:"Cyber crime",zh:"網路犯罪"},
  spy:{e:"🕵️",en:"Counterintelligence",zh:"反情報（間諜）"},
- terror:{e:"💣",en:"Terrorism",zh:"恐怖主義"}};
+ terror:{e:"💣",en:"Terrorism",zh:"恐怖主義"},
+ drugs:{e:"💊",en:"Drug trafficking",zh:"販毒"}};
+// which U.S. agency published the poster (shown only after the guess: the source would give the answer away)
+const AGN={fbi:{en:'FBI',page:'FBI page ↗',pz:'FBI 頁面 ↗',tip:'https://tips.fbi.gov/'},dea:{en:'DEA',page:'DEA page ↗',pz:'DEA 頁面 ↗'},
+ usss:{en:'Secret Service',page:'Secret Service page ↗',pz:'美國特勤局頁面 ↗'},usms:{en:'U.S. Marshals',page:'U.S. Marshals page ↗',pz:'美國法警局頁面 ↗'}};
+const agOf=c=>AGN[c&&c.src]||AGN.fbi;
 const catTxt=g=>CAT[g].e+' '+CAT[g][L];
 const S={en:{
- tag:"Real FBI wanted posters. Look at the face. Guess the crime. Your gut is about to be wrong.",
+ tag:"Real U.S. wanted posters: FBI, DEA, Secret Service, U.S. Marshals. Look at the face. Guess the crime. Your gut is about to be wrong.",
  daily:n=>`TODAY’S 5 FACES #${n}<small>same for everyone</small>`,
  dailyRes:(n,i)=>`KEEP GOING #${n}<small>face ${i+1} of 5</small>`,
  dailyDone:(n,k)=>`✓ #${n} · GUT ${k}/5<small>See results · new faces tomorrow</small>`,
@@ -309,16 +331,16 @@ const S={en:{
  bookB:n=>`📒 Casebook${n?` (${n})`:''}`,
  loading:"Pulling the poster…",retry:"RETRY",loadFail:"Couldn’t load the posters.",
  legal:"Charges are allegations. Everyone is presumed innocent until proven guilty.",
- about:"About & data",tipline:"FBI tip line",updated:(d,n)=>`FBI data refreshed ${d} · ${n} faces in play`,
- q:"The FBI files them under…?",caseD:(i,n)=>`${i}/${n}`,
+ about:"About & data",tipline:"FBI tip line",updated:(d,n)=>`Posters refreshed ${d} · ${n} faces in play`,
+ q:"Wanted for…?",caseD:(i,n)=>`${i}/${n}`,
  peek:"💡 Peek at a clue",peekCost:"+3 → +1",peeked:"Clue used · now +1",
  right:p=>`✓ Called it! +${p}`,wrong:"✗ Your gut lied",
  wantedFor:"Wanted for",moreCh:n=>` (+${n} more)`,
  tip:"Seen them? Tip the FBI ↗",full:"Full poster",fbi:"FBI page ↗",next:"NEXT →",finish:"RESULTS →",
- lgWanted:"Allegations only. Presumed innocent until proven guilty.",
- noPic:"Photo unavailable",enNote:"FBI wording:",
+ lgWanted:"Allegations only. Presumed innocent until proven guilty.",capNote:"No longer at large.",capTag:s=>s==='surrendered'?'Surrendered':'Captured',susTag:"Unknown suspect (FBI seeking info)",noList:"FBI: filed by charge",
+ noPic:"Photo unavailable",enNote:"Original wording:",
  share:"SHARE",again:"PLAY AGAIN",endless2:"♾️ ENDLESS",book:"📒 Casebook",copied:"Copied!",
- foot:"Data: FBI Wanted (public domain)",
+ foot:"Data: FBI, DEA, U.S. Secret Service, U.S. Marshals (public domain)",
  gutT:"YOUR GUT VS REALITY",gutOf:(k,n)=>`gut calls right`,
  mis:(w,n)=>w?`Misjudged ${w} of ${n} face${n>1?'s':''}.`:`${n} for ${n}. Not one face fooled you. Suspicious. 🤨`,
  surT:"😳 Biggest surprise",sur:(g,t)=>`You said ${g}. It was ${t}.`,
@@ -328,14 +350,14 @@ const S={en:{
  endlessRes:(c,b)=>`Lasted ${c} face${c===1?'':'s'} · best ${b} pts`,newBest:"🏆 New best!",
  sh:(n,k,mx)=>`Look Again 🔎 #${n} · gut ${k}/${mx}`,shE:(p,c)=>`Look Again 🔎 Endless · ${p} pts, ${c} faces`,shStreak:n=>`🔥 ${n}-day streak`,
  helpT:"💛 Not a game: help find them",helpP:"Missing people, never scored. If you know anything, tell the FBI.",since:y=>`Missing since ${y}`,tipS:"Tip ↗",
- bookT:"📒 Casebook",bookEmpty:"Faces you play show up here. When the FBI takes a poster down, you’ll see it here.",
+ bookT:"📒 Casebook",bookEmpty:"Faces you play show up here. When an agency takes a poster down, you’ll see it here.",
  bookIntro:(n,k)=>`${n} faces played${k?` · ${k} no longer listed`:''}`,
- closed:"No longer on the FBI list",closedWhy:"The FBI took this poster down. That can mean an arrest, a resolution, or another reason; the FBI doesn’t always say.",
- stillOpen:"Still on the FBI list",played:d=>`played ${d}`,
- fullFiled:"FBI list",onList:"FBI list:",fullDesc:"Charges",fullText:"Details (FBI wording)",fullRm:"Remarks",fullRw:"Reward",fullW:"Warning",
- cutNote:"Physical descriptions are left out here. The FBI page has the full poster."
+ closed:"No longer on the wanted list",closedWhy:"The agency took this poster down. That can mean an arrest, a resolution, or another reason; agencies don’t always say.",
+ stillOpen:"Still on the wanted list",played:d=>`played ${d}`,
+ fullFiled:"Filed under",onList:"FBI list:",fullDesc:"Charges",fullText:"Details (agency wording)",fullRm:"Remarks",fullRw:"Reward",fullW:"Warning",
+ cutNote:"Physical descriptions are left out here. The agency’s page has the full poster."
 },zh:{
- tag:"真實 FBI 通緝照。看臉，猜罪名。你的直覺準備被打臉。",
+ tag:"真實美國通緝照：FBI、DEA、特勤局、法警局。看臉，猜罪名。你的直覺準備被打臉。",
  daily:n=>`今日 5 張臉 #${n}<small>大家都一樣</small>`,
  dailyRes:(n,i)=>`繼續 #${n}<small>第 ${i+1} / 5 張</small>`,
  dailyDone:(n,k)=>`✓ #${n}・直覺 ${k}/5<small>看結果・明天換新臉</small>`,
@@ -343,16 +365,16 @@ const S={en:{
  bookB:n=>`📒 辦案筆記${n?`（${n}）`:''}`,
  loading:"調閱通緝照中…",retry:"重試",loadFail:"通緝資料載入失敗。",
  legal:"起訴內容僅為指控，未經法院定罪前，任何人皆推定無罪。",
- about:"關於與資料來源",tipline:"FBI 線索專線",updated:(d,n)=>`FBI 資料更新於 ${d}・共 ${n} 張臉`,
- q:"FBI 把這個人歸在哪一類？",caseD:(i,n)=>`${i}/${n}`,
+ about:"關於與資料來源",tipline:"FBI 線索專線",updated:(d,n)=>`通緝資料更新於 ${d}・共 ${n} 張臉`,
+ q:"這個人涉嫌什麼？",caseD:(i,n)=>`${i}/${n}`,
  peek:"💡 偷看線索",peekCost:"+3 → +1",peeked:"已看線索・現在 +1",
  right:p=>`✓ 一眼看穿！+${p}`,wrong:"✗ 被直覺騙了",
  wantedFor:"涉嫌",moreCh:n=>`（另有 ${n} 項）`,
  tip:"見過這個人？向 FBI 報案 ↗",full:"完整公告",fbi:"FBI 頁面 ↗",next:"下一張 →",finish:"看結果 →",
- lgWanted:"僅為指控，未經定罪前推定無罪。",
- noPic:"照片無法顯示",enNote:"FBI 原文：",
+ lgWanted:"僅為指控，未經定罪前推定無罪。",capNote:"此人已落網。",capTag:s=>s==='surrendered'?'已投案':'已落網',susTag:"身分不明的嫌犯（FBI 徵求線索）",noList:"FBI：依罪名歸類",
+ noPic:"照片無法顯示",enNote:"英文原文：",
  share:"分享",again:"再玩一次",endless2:"♾️ 無盡模式",book:"📒 辦案筆記",copied:"已複製！",
- foot:"資料：FBI Wanted（公有領域）",
+ foot:"資料：FBI、DEA、美國特勤局、美國法警局（公有領域）",
  gutT:"你的直覺 vs 現實",gutOf:()=>`直覺猜中`,
  mis:(w,n)=>w?`${n} 張臉，看走眼 ${w} 張。`:`${n} 張全中，沒有一張臉騙得了你。有點可疑 🤨`,
  surT:"😳 最出乎意料",sur:(g,t)=>`你猜 ${g}，其實是 ${t}。`,
@@ -362,12 +384,12 @@ const S={en:{
  endlessRes:(c,b)=>`撐了 ${c} 張臉・最佳 ${b} 分`,newBest:"🏆 新紀錄！",
  sh:(n,k,mx)=>`再看一眼 🔎 #${n}・直覺 ${k}/${mx}`,shE:(p,c)=>`再看一眼 🔎 無盡模式・${c} 張臉 ${p} 分`,shStreak:n=>`🔥 連續 ${n} 天`,
  helpT:"💛 這不是遊戲：幫忙找人",helpP:"失蹤者，不計分。若你知道任何消息，請告訴 FBI。",since:y=>`${y} 年起失蹤`,tipS:"提供線索 ↗",
- bookT:"📒 辦案筆記",bookEmpty:"玩過的臉會出現在這裡。FBI 撤下公告時，這裡會告訴你。",
+ bookT:"📒 辦案筆記",bookEmpty:"玩過的臉會出現在這裡。機關撤下公告時，這裡會告訴你。",
  bookIntro:(n,k)=>`玩過 ${n} 張${k?`・${k} 張已不在名單上`:''}`,
- closed:"已不在 FBI 名單上",closedWhy:"FBI 已撤下這張公告。可能是已逮捕、已解決或其他原因，FBI 不一定會說明。",
- stillOpen:"仍在 FBI 名單上",played:d=>`${d} 玩過`,
- fullFiled:"FBI 名單",onList:"FBI 名單：",fullDesc:"罪名",fullText:"案情（FBI 英文原文）",fullRm:"備註",fullRw:"懸賞",fullW:"警告",
- cutNote:"此處略去外貌描述；完整公告請見 FBI 官方頁面。"
+ closed:"已不在通緝名單上",closedWhy:"機關已撤下這張公告。可能是已逮捕、已解決或其他原因，機關不一定會說明。",
+ stillOpen:"仍在通緝名單上",played:d=>`${d} 玩過`,
+ fullFiled:"歸類",onList:"FBI 名單：",fullDesc:"罪名",fullText:"案情（機關英文原文）",fullRm:"備註",fullRw:"懸賞",fullW:"警告",
+ cutNote:"此處略去外貌描述；完整公告請見該機關官方頁面。"
 }};
 const $=id=>document.getElementById(id);
 const LS={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
@@ -383,17 +405,20 @@ function shuf(a,r=Math.random){for(let i=a.length-1;i>0;i--){const j=r()*(i+1)|0
 function today(){const d=new Date(Date.now()+8*36e5);return d.toISOString().slice(0,10)}
 function dayNo(day){const [y,m,d]=day.split('-').map(Number);return Math.round((Date.UTC(y,m-1,d)-EPOCH)/864e5)+1}
 function grp(c){return c.g}
-function grpSet(c){return new Set([c.g,...(c.m||[])])}
+function okOf(c){return Array.isArray(c.ok)&&c.ok.length?c.ok.filter(x=>GROUPS.includes(x)):[c.g]}
+function grpSet(c){return new Set([...okOf(c),...(c.m||[])])}
 function freeOf(c){const set=grpSet(c);return GROUPS.filter(x=>!set.has(x)&&(POOL[x]||[]).length)}
+// the right option dealt in this round (one of okOf(c)); older saved runs fall back to c.g
+function rightOf(c,o){const ok=okOf(c);return (o||[]).find(b=>ok.includes(b))||c.g}
 async function getJSON(u,tries){for(let k=0;k<tries;k++){try{const r=await fetch(u,{cache:'no-cache'});if(!r.ok)throw 0;return await r.json()}catch(e){if(k<tries-1)await new Promise(r=>setTimeout(r,600*(k+1)))}}throw new Error('load')}
 let loadP=null;
 function boot(){loadP=getJSON('cases.json',3).then(d=>{if(!d.cases||!d.cases.length)throw new Error('empty');DATA=d;BYID={};POOL={};MISSING=[];
- for(const c of d.cases){BYID[c.id]=c;const g=grp(c);if(g&&GROUPS.includes(g)&&Array.isArray(c.m)&&c.im&&c.fq)(POOL[g]=POOL[g]||[]).push(c);else if(c.c==='missing'&&c.im)MISSING.push(c)}
- for(const g in POOL)POOL[g]=POOL[g].filter(c=>freeOf(c).length>=2);
+ for(const c of d.cases){BYID[c.id]=c;const g=grp(c);if(g&&GROUPS.includes(g)&&Array.isArray(c.m)&&c.im&&c.fq){for(const x of okOf(c))(POOL[x]=POOL[x]||[]).push(c)}else if(c.c==='missing'&&c.im)MISSING.push(c)}
+ for(const g in POOL)POOL[g]=POOL[g].filter(c=>freeOf(c).length>=1);
  if(!GROUPS.some(g=>(POOL[g]||[]).length))throw new Error('empty');
  $('upd').textContent=T('updated')(fmtDate(d.updated),poolN());renderStart();return d});
  return loadP}
-function poolN(){return GROUPS.reduce((s,g)=>s+(POOL[g]||[]).length,0)}
+function poolN(){const u=new Set();for(const g of GROUPS)for(const c of POOL[g]||[])u.add(c.id);return u.size}
 boot().catch(()=>{});
 function fmtDate(iso){const d=new Date(String(iso).replace(/Z$/,':00Z'));if(isNaN(d))return String(iso).slice(0,10);
  return d.toLocaleDateString(L==='zh'?'zh-TW':'en-US',{year:'numeric',month:'short',day:'numeric',timeZone:'Asia/Taipei'})}
@@ -406,20 +431,21 @@ function docketIds(day){const r=rng('face|'+day),cnt={},ids=[];
  while(plan.length<DOCKET){const g=GROUPS[r()*GROUPS.length|0];if(plan.filter(x=>x===g).length<2)plan.push(g)}
  shuf(plan,r);
  for(const g0 of plan){let g=g0;if(!(POOL[g]||[]).length)g=GROUPS.find(x=>(POOL[x]||[]).length);
-  const best=POOL[g].filter(c=>!ids.includes(c.id)).map(c=>[h32(day+'|'+c.id),c.id]).sort((a,b)=>a[0]-b[0])[0];if(best)ids.push(best[1])}
+  const best=POOL[g].filter(c=>!ids.includes(c.id)).map(c=>[h32(day+'|'+c.id),c.id]).sort((a,b)=>a[0]-b[0])[0];if(best){ids.push(best[1]);DEALT[best[1]]=g}}
  return ids}
-function optsFor(c,r=Math.random){const d=shuf(freeOf(c),r).slice(0,3);return shuf([grp(c),...d],r)}
+let DEALT={};
+function optsFor(c,r=Math.random,g){const ok=okOf(c);if(!ok.includes(g))g=ok.includes(c.g)?c.g:ok[0];const d=shuf(freeOf(c),r).slice(0,3);return shuf([g,...d],r)}
 function pickEndless(){const seen=new Set(LS.get('la2_seen')||[]);const used=new Set(run?run.ids:[]);
- const gs=GROUPS.filter(g=>(POOL[g]||[]).length);const last=run&&run.ids.length?grp(BYID[run.ids[run.ids.length-1]]):null;
+ const gs=GROUPS.filter(g=>(POOL[g]||[]).length);const last=run&&run.ids.length?rightOf(BYID[run.ids[run.ids.length-1]],run.opts[run.ids.length-1]):null;
  let g=gs[Math.random()*gs.length|0];if(g===last&&gs.length>1)g=gs[Math.random()*gs.length|0];
- let p=POOL[g].filter(c=>!seen.has(c.id)&&!used.has(c.id));if(!p.length)p=POOL[g].filter(c=>!used.has(c.id));if(!p.length)p=POOL[g];return p[Math.random()*p.length|0].id}
-function newDaily(){const day=today(),ids=docketIds(day),r=rng('fopts|'+day);run={mode:'d',day,ids,opts:ids.map(id=>optsFor(BYID[id],r)),i:0,pk:0,res:[],x:STAT.rid()};save()}
+ let p=POOL[g].filter(c=>!seen.has(c.id)&&!used.has(c.id));if(!p.length)p=POOL[g].filter(c=>!used.has(c.id));if(!p.length)p=POOL[g];const id=p[Math.random()*p.length|0].id;DEALT[id]=g;return id}
+function newDaily(){const day=today(),ids=docketIds(day),r=rng('fopts|'+day);run={mode:'d',day,ids,opts:ids.map(id=>optsFor(BYID[id],r,DEALT[id])),i:0,pk:0,res:[],x:STAT.rid()};save()}
 function newEndless(){run={mode:'e',ids:[],opts:[],i:0,pk:0,res:[],lives:LIVES,x:STAT.rid()};addEndless();save()}
-function addEndless(){const id=pickEndless();run.ids.push(id);run.opts.push(optsFor(BYID[id]))}
+function addEndless(){const id=pickEndless();run.ids.push(id);run.opts.push(optsFor(BYID[id],Math.random,DEALT[id]))}
 // a saved run resumes only if its unplayed rounds are still playable; options saved under an older scheme are re-dealt
 function fixRun(r){if(!Array.isArray(r.ids)||!Array.isArray(r.opts)||!Array.isArray(r.res))return false;
- for(let j=r.res.length;j<r.ids.length;j++){const c=BYID[r.ids[j]];if(!c||!POOL[grp(c)]||!POOL[grp(c)].includes(c))return false;
-  const o=r.opts[j],set=grpSet(c);if(!Array.isArray(o)||!o.includes(grp(c))||o.filter(b=>set.has(b)).length!==1||o.some(b=>!CAT[b]))r.opts[j]=optsFor(c)}
+ for(let j=r.res.length;j<r.ids.length;j++){const c=BYID[r.ids[j]];if(!c||!okOf(c).some(g=>(POOL[g]||[]).includes(c)))return false;
+  const o=r.opts[j],set=grpSet(c),ok=okOf(c);if(!Array.isArray(o)||o.length<2||o.some(b=>!CAT[b])||o.filter(b=>set.has(b)).length!==1||!o.some(b=>ok.includes(b)))r.opts[j]=optsFor(c,Math.random,(o||[]).find(b=>ok.includes(b)))}
  return true}
 const MODE=r=>r.mode==='d'?'daily':'endless';
 function save(){LS.set(run.mode==='d'?'la4_daily':'la4_endless',run)}
@@ -446,7 +472,7 @@ function renderRound(fresh){
  $('clue').hidden=!run.pk||!cl.length;$('clue').innerHTML=run.pk&&cl.length?`<b>💡</b> <span>${hl(cl[0])}</span>`:'';
  const pb=$('peekBtn');pb.hidden=!cl.length;pb.disabled=!!run.pk;pb.innerHTML=run.pk?esc(T('peeked')):`${esc(T('peek'))} <small>${esc(T('peekCost'))}</small>`;
  $('opts').innerHTML=run.opts[run.i].map((b,j)=>`<button type="button" data-b="${b}" id="b${j}"><span class="e" aria-hidden="true">${CAT[b].e}</span><span class="t">${esc(CAT[b][L])}</span></button>`).join('');
- $('opts').querySelectorAll('button').forEach(btn=>btn.onclick=()=>answer(btn.dataset.b));
+ $('opts').className='opts'+(run.opts[run.i].length===2?' n2':'');$('opts').querySelectorAll('button').forEach(btn=>btn.onclick=()=>answer(btn.dataset.b));
  $('stamp').className='stamp';$('stamp').textContent='';
  $('game').classList.toggle('done',done);
  if(done)renderReveal(true);
@@ -455,13 +481,13 @@ function renderRound(fresh){
 function peek(){if(!run||run.res.length>run.i||run.pk||!clueOf(cur()).length)return;run.pk=1;save();renderRound(false);bump($('worth'));if(navigator.vibrate)try{navigator.vibrate(8)}catch(e){}}
 $('peekBtn').onclick=peek;
 function answer(b){if(!run||run.res.length>run.i||Date.now()-tGuard<GUARD)return;const c=cur(),ok=grpSet(c).has(b),p=ok?PTS[run.pk?1:0]:0;
- STAT.send('round',{m:MODE(run),x:run.x,n:run.i,k:ok?1:0,h:run.pk?1:0});run.res.push({b,n:run.pk?2:1,ok,p,g:grp(c)});if(run.mode==='e'&&!ok)run.lives--;save();addBook(c,ok,p);tGuard=Date.now();
+ STAT.send('round',{m:MODE(run),x:run.x,n:run.i,k:ok?1:0,h:run.pk?1:0});run.res.push({b,n:run.pk?2:1,ok,p,g:ok?b:rightOf(c,run.opts[run.i])});if(run.mode==='e'&&!ok)run.lives--;save();addBook(c,ok,p);tGuard=Date.now();
  $('game').classList.add('done');renderReveal(false);hud();bump($('hud'));if(navigator.vibrate)try{navigator.vibrate(ok?[15,30,15]:[40])}catch(e){}}
-function renderReveal(re){const c=cur(),x=run.res[run.i],g=grp(c),ch=chargeOf(c);
+function renderReveal(re){const c=cur(),x=run.res[run.i],g=x.g&&okOf(c).includes(x.g)?x.g:rightOf(c,run.opts[run.i]),ch=chargeOf(c),also=okOf(c).filter(y=>y!==g);
  $('worth').hidden=true;
  const st=$('stamp');st.className='stamp on '+(x.ok?'ok':'no');st.textContent=x.ok?`+${x.p}`:'✗';
  $('verdict').textContent=x.ok?T('right')(x.p):T('wrong');$('verdict').className='verdict '+(x.ok?'ok':'no');
- $('rcat').innerHTML=`<span aria-hidden="true">${CAT[g].e}</span> ${esc(CAT[g][L])}`+(x.ok?'':` <s>${esc(CAT[x.b].e+' '+CAT[x.b][L])}</s>`)+(c.sj&&c.sj.length?`<small class="fl">${esc(T('onList'))} <span lang="en">${esc(c.sj.join(' · '))}</span></small>`:'');
+ $('rcat').innerHTML=`<span aria-hidden="true">${CAT[g].e}</span> ${esc(CAT[g][L])}`+(also.length?`<span class="also"> + ${also.map(y=>esc(catTxt(y))).join(' + ')}</span>`:'')+(x.ok?'':` <s>${esc(CAT[x.b].e+' '+CAT[x.b][L])}</s>`)+`<small class="fl">${esc(fileLine(c))}</small>`;
  $('rname').textContent=titleCase(nameOf(c));
  let h='';
  if(L==='zh'){h+=`<span class="zh"><b>${esc(ch.q?'FBI 要約談':T('wantedFor'))}</b>${ch.zh?'：'+esc(ch.zh):''}</span>`;
@@ -469,21 +495,25 @@ function renderReveal(re){const c=cur(),x=run.res[run.i],g=grp(c),ch=chargeOf(c)
  else h+=`<span class="en"><b>${ch.q?'':esc(T('wantedFor'))+': '}</b>${esc(ch.head)}${ch.more?`<small>${esc(T('moreCh')(ch.more))}</small>`:''}</span>`;
  $('rhead').innerHTML=h;
  $('rline').innerHTML=lineOf(c,ch);
- $('fbiLink').href=c.url;$('rlegal').textContent=T('lgWanted');
+ $('fbiLink').href=c.url;$('fbiLink').textContent=pageTxt(c);$('rlegal').textContent=(c.cap?T('capNote')+' ':'')+T('lgWanted');$('rv').querySelector('.tip').hidden=!!c.cap||!agOf(c).tip;
  const im=$('pic').querySelector('img');if(im)im.alt=nameOf(c);
  const over=run.mode==='d'?run.i+1>=run.ids.length:run.lives<=0;$('next').textContent=over?T('finish'):T('next');
  if(!re)setTimeout(()=>$('next').focus({preventScroll:true}),60)}
+// what the FBI poster itself says about the case: its lists, captured status, unknown-suspect posters
+function fileLine(c){const p=[];if(c.ag)return c.ag[L]||c.ag.en;if(c.sus)p.push(T('susTag'));if(c.cap)p.push(T('capTag')(c.cap));
+ if(c.sj&&c.sj.length)p.push(T('onList')+' '+c.sj.join(' · '));else if(!c.sus)p.push(T('noList'));return p.join(' · ')}
+function pageTxt(c){const a=agOf(c);return L==='zh'?a.pz:a.page}
 function lineOf(c,ch){if(L==='zh'){const cl=clueOf(c);const z=cl.length>1&&run.pk?cl[1]:cl[0];return z?hl(z):''}
  const t=(c.r.t||[]);for(const s0 of t){const s=firstSentence(s0);if(s&&s.indexOf(ch.head.replace(/…$/,''))<0)return esc(clip(s,170))}return ''}
 function fullPoster(){const c=cur(),r=c.r;let h='';
- h+=`<h3>${esc(T('fullFiled'))}</h3><p>${esc(catTxt(grp(c)))}${c.sj&&c.sj.length?` · <span lang="en">${esc(c.sj.join(' · '))}</span>`:''}</p>`;
+ h+=`<h3>${esc(T('fullFiled'))}</h3><p>${esc(okOf(c).map(catTxt).join(' + '))}${c.ag?` · ${esc(c.ag[L]||c.ag.en)}`:c.sj&&c.sj.length?` · <span lang="en">${esc(c.sj.join(' · '))}</span>`:''}${c.cap?` · <b>${esc(T('capTag')(c.cap))}</b>`:''}${c.sus?` · ${esc(T('susTag'))}`:''}</p>`;
  if(r.w)h+=`<p class="w" lang="en">${esc(r.w)}</p>`;
  if(r.d)h+=`<h3>${esc(T('fullDesc'))}</h3><p lang="en">${esc(r.d)}</p>`;
  if(r.t&&r.t.length)h+=`<h3>${esc(T('fullText'))}</h3>`+r.t.map(s=>`<p lang="en">${esc(s)}</p>`).join('');
  if(r.rm&&r.rm.filter(Boolean).length)h+=`<h3>${esc(T('fullRm'))}</h3>`+r.rm.filter(Boolean).map(s=>`<p lang="en">${esc(s)}</p>`).join('');
  if(r.rw)h+=`<h3>${esc(T('fullRw'))}</h3><p lang="en">${esc(r.rw)}</p>`;
  h+=`<p><i>${esc(T('lgWanted'))}</i></p><p><i>${esc(T('cutNote'))}</i></p>`;
- h+=`<p><a href="https://tips.fbi.gov/" target="_blank" rel="noopener"><b>${esc(T('tip'))}</b></a><br><a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(T('fbi'))}</a></p>`;
+ h+=`<p>${agOf(c).tip&&!c.cap?`<a href="${agOf(c).tip}" target="_blank" rel="noopener"><b>${esc(T('tip'))}</b></a><br>`:''}<a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(pageTxt(c))}</a></p>`;
  openDlg(titleCase(nameOf(c)),h)}
 $('fullBtn').onclick=fullPoster;
 function openDlg(t,h){$('dlgT').textContent=t;$('dlgB').innerHTML=h;$('dlgB').scrollTop=0;const d=$('dlg');if(!d.open){d.showModal();history.pushState({dlg:1},'')}}
@@ -536,6 +566,10 @@ function renderEnd(){const r=lastEnd;if(!r)return;run=r;const sc=score(r),n=r.re
   sc2.innerHTML=`<img src="${esc(c.im)}" alt="${esc(titleCase(nameOf(c)))}"><div><b>${esc(T('surT'))}</b><span>${esc(T('sur')(catTxt(s.b),catTxt(s.g)))}</span><a href="${esc(c.url)}" target="_blank" rel="noopener" lang="en">${esc(titleCase(nameOf(c)))} ↗</a></div>`}
  else{sc2.hidden=true;sc2.innerHTML=''}
  const bi=bias(r);$('bias').hidden=!bi;$('bias').textContent=bi?T('bias')(catTxt(bi.g),bi.n,bi.k):'';
+ const fx=r.res.map((x,i)=>[x,BYID[r.ids[i]]]);
+ if(fx.length<=8&&fx.every(([x,c])=>c&&c.im)){$('grid').hidden=true;$('faces').hidden=false;
+  $('faces').innerHTML=fx.map(([x,c])=>`<span class="fc${x.ok?(x.n>1?' hint':' ok'):''}"><img src="${esc(c.im)}" alt="" loading="lazy"><i>${x.ok?'✓':'✗'} ${CAT[x.g]?CAT[x.g].e:''}</i></span>`).join('')}
+ else{$('faces').hidden=true;$('faces').innerHTML='';$('grid').hidden=false}
  $('grid').textContent=r.res.map(sq).join('');$('prog').style.width='100%';
  renderHelp(r.mode==='d'?r.day:null)}
 let helpPick=null;
@@ -589,7 +623,7 @@ addEventListener('keydown',e=>{if($('dlg').open||!$('game').classList.contains('
 applyLang();STAT.send('view');
 if(/(^|[?&])daily\b/.test(location.search.slice(1)))start('d');
 </script>
-<!--howto--><script>(()=>{const D={"en": {"title": "🔎 Look Again", "steps": ["A real FBI wanted poster. Just the face.", "Guess which FBI list they’re on. One tap.", "Gut call: +3. After a 💡 peek at a clue: +1."], "example": "<style>@media (orientation:landscape) and (max-height:520px){.mx-look{display:none}}</style><div class=\"mx-look\"><div aria-hidden=\"true\" style=\"display:flex;gap:.6em;align-items:stretch;font-size:.85em\">\n<div style=\"flex:none;width:4.2em;aspect-ratio:3/4;border-radius:.45em;background:#ece6d6;color:#1d1b17;display:flex;align-items:center;justify-content:center;font:900 1.9em system-ui,sans-serif;position:relative\">?<span style=\"position:absolute;top:.25em;right:.25em;background:#f0b429;color:#111;border-radius:999px;font-size:.36em;padding:0 .45em\">+3</span></div>\n<div style=\"flex:1;display:grid;grid-template-columns:1fr 1fr;gap:.35em;align-content:center\"><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">🔪 Violent</span><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">💸 White-collar</span><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">💻 Cyber</span><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">💣 Terror</span></div></div></div>"}, "zh": {"title": "🔎 再看一眼", "steps": ["一張真實的 FBI 通緝照，只看臉。", "猜 FBI 把這個人歸在哪一類，點一下就好。", "憑直覺猜中 +3；偷看 💡 線索再猜中 +1。"], "example": "<style>@media (orientation:landscape) and (max-height:520px){.mx-look{display:none}}</style><div class=\"mx-look\"><div aria-hidden=\"true\" style=\"display:flex;gap:.6em;align-items:stretch;font-size:.85em\">\n<div style=\"flex:none;width:4.2em;aspect-ratio:3/4;border-radius:.45em;background:#ece6d6;color:#1d1b17;display:flex;align-items:center;justify-content:center;font:900 1.9em system-ui,sans-serif;position:relative\">?<span style=\"position:absolute;top:.25em;right:.25em;background:#f0b429;color:#111;border-radius:999px;font-size:.36em;padding:0 .45em\">+3</span></div>\n<div style=\"flex:1;display:grid;grid-template-columns:1fr 1fr;gap:.35em;align-content:center\"><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">🔪 暴力</span><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">💸 白領</span><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">💻 網路</span><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">💣 恐攻</span></div></div></div>"}},K="howto_la4",UI={en:{ok:"Got it",q:"How to play"},zh:{ok:"懂了",q:"怎麼玩"}};
+<!--howto--><script>(()=>{const D={"en": {"title": "🔎 Look Again", "steps": ["A real U.S. wanted poster. Just the face.", "Guess what they’re wanted for. One tap.", "Gut call: +3. After a 💡 peek at a clue: +1."], "example": "<style>@media (orientation:landscape) and (max-height:520px){.mx-look{display:none}}</style><div class=\"mx-look\"><div aria-hidden=\"true\" style=\"display:flex;gap:.6em;align-items:stretch;font-size:.85em\">\n<div style=\"flex:none;width:4.2em;aspect-ratio:3/4;border-radius:.45em;background:#ece6d6;color:#1d1b17;display:flex;align-items:center;justify-content:center;font:900 1.9em system-ui,sans-serif;position:relative\">?<span style=\"position:absolute;top:.25em;right:.25em;background:#f0b429;color:#111;border-radius:999px;font-size:.36em;padding:0 .45em\">+3</span></div>\n<div style=\"flex:1;display:grid;grid-template-columns:1fr 1fr;gap:.35em;align-content:center\"><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">🔪 Violent</span><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">💸 White-collar</span><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">💻 Cyber</span><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">💣 Terror</span></div></div></div>"}, "zh": {"title": "🔎 再看一眼", "steps": ["一張真實的美國通緝照，只看臉。", "猜這個人涉嫌什麼，點一下就好。", "憑直覺猜中 +3；偷看 💡 線索再猜中 +1。"], "example": "<style>@media (orientation:landscape) and (max-height:520px){.mx-look{display:none}}</style><div class=\"mx-look\"><div aria-hidden=\"true\" style=\"display:flex;gap:.6em;align-items:stretch;font-size:.85em\">\n<div style=\"flex:none;width:4.2em;aspect-ratio:3/4;border-radius:.45em;background:#ece6d6;color:#1d1b17;display:flex;align-items:center;justify-content:center;font:900 1.9em system-ui,sans-serif;position:relative\">?<span style=\"position:absolute;top:.25em;right:.25em;background:#f0b429;color:#111;border-radius:999px;font-size:.36em;padding:0 .45em\">+3</span></div>\n<div style=\"flex:1;display:grid;grid-template-columns:1fr 1fr;gap:.35em;align-content:center\"><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">🔪 暴力</span><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">💸 白領</span><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">💻 網路</span><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">💣 恐攻</span></div></div></div>"}},K="howto_la4",UI={en:{ok:"Got it",q:"How to play"},zh:{ok:"懂了",q:"怎麼玩"}};
 const st=document.createElement("style");st.textContent=".howto-q{flex:none;align-self:center;width:1.9em;height:1.9em;min-width:28px;min-height:28px;padding:0;margin:0 .35em;border-radius:50%;border:2px solid currentColor;background:transparent;color:inherit;font:900 15px/1 system-ui,sans-serif;opacity:.8;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;touch-action:manipulation}\n.howto-q:hover,.howto-q:focus-visible{opacity:1}\n.howto{position:fixed;inset:0;z-index:2147483000;background:#000a;display:flex;align-items:center;justify-content:center;padding:max(12px,env(safe-area-inset-top)) 12px max(12px,env(safe-area-inset-bottom));font-family:system-ui,-apple-system,\"PingFang TC\",\"Noto Sans TC\",sans-serif}\n.howto[hidden]{display:none!important}\n.howto,.howto *{box-sizing:border-box;text-transform:none;letter-spacing:normal}\n.howto .howto-ok{display:block!important;width:100%;margin:0;min-height:0;height:auto;line-height:1.2;text-align:center;box-shadow:none;border:0;text-transform:none;letter-spacing:normal}\n.howto .howto-card{width:min(26rem,100%);max-height:100%;overflow:hidden;background:#17181d;color:#f3f1ec;border:1px solid #ffffff2a;border-radius:14px;box-shadow:0 12px 40px #000c;padding:clamp(12px,3.2vh,20px) clamp(14px,4.5vw,22px);display:flex;flex-direction:column;gap:clamp(8px,1.8vh,14px);text-align:left}\n.howto .howto-t{margin:0;padding:0;border:0;background:none;color:inherit;text-align:left;font-family:inherit;font-size:clamp(17px,min(5.4vw,3.4vh),22px);font-weight:900;line-height:1.2}\n.howto .howto-steps{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:clamp(5px,1.2vh,9px);counter-reset:h}\n.howto .howto-steps>li{counter-increment:h;margin:0;padding:0;border:0;background:none;color:inherit;text-align:left;font-weight:500;display:flex;gap:.6em;align-items:flex-start;font-size:clamp(14px,min(4.2vw,2.5vh),17px);line-height:1.35}\n.howto .howto-steps>li::before{content:counter(h);flex:none;width:1.5em;height:1.5em;border-radius:50%;background:#ffd84a;color:#111;font-weight:900;font-size:.85em;display:flex;align-items:center;justify-content:center;margin-top:.1em}\n.howto .howto-ex{font-size:clamp(13px,min(4vw,2.3vh),16px)}\n.howto .howto-ex:empty{display:none}\n.howto .howto-ok{align-self:stretch;border:0;border-radius:10px;background:#ffd84a;color:#111;font:900 clamp(15px,min(4.6vw,2.8vh),18px) system-ui,sans-serif;padding:clamp(9px,1.8vh,13px);cursor:pointer;touch-action:manipulation}\n@media (orientation:landscape) and (max-height:520px){.howto .howto-card{width:min(44rem,100%);display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto 1fr auto;column-gap:18px;row-gap:8px}\n .howto .howto-t{grid-column:1/-1}.howto .howto-steps{grid-column:1}.howto .howto-ex{grid-column:2;grid-row:2/4;align-self:center}.howto .howto-ok{grid-column:1}.howto .howto-ex svg{max-height:52vh!important}}";document.head.appendChild(st);
 const L=()=>D.zh&&/^zh/i.test(document.documentElement.lang||"")?"zh":"en";
 const ov=document.createElement("div");ov.className="howto";ov.hidden=true;ov.setAttribute("role","dialog");ov.setAttribute("aria-modal","true");ov.setAttribute("aria-labelledby","howtoT");

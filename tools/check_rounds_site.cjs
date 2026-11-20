@@ -4,7 +4,7 @@ const P=require('/workspace/tools/node_modules/puppeteer-core'),fs=require('fs')
 const src=fs.readFileSync(__dirname+'/check_rounds.mjs','utf8');
 const FBI=src.match(/const FBI = (\{[\s\S]*?\});/)[1],KW=src.match(/const KW = (\{[\s\S]*?\});/)[1];
 (async()=>{const b=await P.launch({executablePath:'/usr/bin/google-chrome',args:['--no-sandbox']});const pg=await b.newPage();
- const errs=[];pg.on('pageerror',e=>errs.push(e.message));pg.on('request',q=>{if(/(^|\.)(fbi|justice)\.gov$/i.test(new URL(q.url()).hostname))errs.push('CONTACTED '+q.url())});
+ const errs=[];pg.on('pageerror',e=>errs.push(e.message));pg.on('request',q=>{if(/(^|\.)(fbi|justice|dea|secretservice|usmarshals)\.gov$/i.test(new URL(q.url()).hostname))errs.push('CONTACTED '+q.url())});
  await pg.goto(process.argv[2]+'?t=off',{waitUntil:'networkidle0'});await pg.waitForFunction(()=>typeof POOL==='object'&&Object.keys(POOL).length>0);
  const r=await pg.evaluate((FBIs,KWs)=>{const FBI=eval('('+FBIs+')'),KW=eval('('+KWs+')');
   const txt=c=>[c.title,c.r&&c.r.d,...((c.r&&c.r.t)||[]),...((c.r&&c.r.rm)||[]),c.r&&c.r.rw].filter(Boolean).join(' ');

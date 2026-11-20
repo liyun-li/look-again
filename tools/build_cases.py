@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Refresh cases.json from the public FBI Wanted API (https://api.fbi.gov/wanted/v1/list).
-Stdlib only. Keeps the previous cases.json if the API can't be read.
+Plus the DEA / Secret Service / U.S. Marshals lists saved by tools/agencies.cjs (agencies.json). Needs Pillow.
+Keeps the previous cases.json if the API can't be read.
 Rules: no race/ethnicity/physical-description text, no sex before reveal, no gore, no child-exploitation
-or unidentified-remains or homicide/sexual-assault ViCAP files, no deceased-victim cases.
-Case text is the FBI's own wording (sentences may be dropped, never rewritten)."""
-import json, re, os, sys, time, html, urllib.request, urllib.error, hashlib, datetime
+or unidentified-remains or homicide/sexual-assault ViCAP files, no deceased-victim cases, no crimes against children.
+Case text is the agency's own wording (sentences may be dropped, never rewritten)."""
+import json, re, os, sys, time, html, urllib.request, urllib.error, urllib.parse, hashlib, datetime
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import cats  # answer categories from the FBI's own lists (see cats.py)
 
@@ -237,7 +238,9 @@ def get(url, tries=4, kind='api'):
             with urllib.request.urlopen(req, timeout=40) as r:
                 return r.read(), r.headers.get('Content-Type', '')
         except Exception as e:
-            print('retry', url, e, file=sys.stderr); time.sleep(5 * 2 ** k)
+            print('retry', url, e, file=sys.stderr)
+            if getattr(e, 'code', 0) in (403, 404, 410, 500): return None, ''   # gone / blocked: don't hammer
+            time.sleep(5 * 2 ** k)
     return None, ''
 
 def text(h):
@@ -347,6 +350,21 @@ def zh_place(p):
     parts = [x.strip() for x in p.split(',')]
     return '，'.join(STATES.get(x, x) for x in parts)
 
+SUS_D = re.compile(r'^\s*unknown (suspect|individual|robbery suspect|bank robber|subject)s?(\(s\))?\b', re.I)
+SUS_T = re.compile(r'\b(unknown (bank )?(robbery )?(suspect|robber|subject)s?|bank robber)\b', re.I)
+VICTIM = re.compile(r'victim|deceased|death investigation|body located|missing|suspicious death|remains', re.I)
+def is_unknown_suspect(it):
+    """A 'Seeking Information' poster whose photos show the SUSPECT(S) (FBI's description line says 'Unknown Suspect(s)'
+    or the title names an unknown suspect / robber) and never a victim poster."""
+    if it.get('person_classification') == 'Victim': return False
+    d = text(it.get('description')); first = (d.split('\n') or [''])[0]
+    if VICTIM.search(first) or VICTIM.search(it.get('title') or ''): return False
+    return bool(SUS_D.search(first) or SUS_T.search(it.get('title') or ''))
+
+def sus_charge(it):
+    """Unknown-suspect posters carry the crime in the title ('BANK ROBBERY - CLARKSVILLE, VIRGINIA')."""
+    return re.split(r' - | — | – ', it.get('title') or '')[0]
+
 def bucket_of(it):
     subj = it.get('subjects') or []
     if any(s in EXCLUDE_SUBJ for s in subj): return None, []
@@ -390,9 +408,12 @@ def build(items):
     cases = []; skipped = {}
     def skip(r): skipped[r] = skipped.get(r, 0) + 1
     for it in items:
-        if (it.get('status') or 'na') != 'na': skip('status'); continue
+        st = it.get('status') or 'na'
+        if st not in ('na', 'captured', 'surrendered'): skip('status'); continue   # deceased / resolved: not a wanted face
         b, allb = bucket_of(it)
         if not b: skip('category'); continue
+        sus = b == 'seeking' and is_unknown_suspect(it)   # 'Seeking Information' about an unknown SUSPECT (never a victim)
+        if st != 'na' and b in ('missing', 'parental', 'seeking') and not sus: skip('status'); continue
         if b == 'missing' and not INCLUDE_MISSING: skip('missing-off'); continue
         if EXCLUDE_PATH.search(it.get('url') or ''): skip('path'); continue
         imgs = [i for i in (it.get('images') or []) if i.get('large') or i.get('original')]
@@ -401,7 +422,7 @@ def build(items):
         alltext = ' '.join([it.get('title') or '', text(it.get('description')), text(it.get('caution')), text(it.get('details')),
                             text(it.get('remarks')), text(it.get('additional_information'))])
         if GRAPHIC.search(alltext): skip('graphic'); continue
-        if b in ('missing', 'seeking') and DEATH.search(alltext): skip('death'); continue
+        if b in ('missing', 'seeking') and not sus and DEATH.search(alltext): skip('death'); continue
         if b == 'seeking' and it.get('person_classification') == 'Victim': skip('seeking-victim'); continue
         names = names_of(it)
         sents = clean_for_reveal(main)
@@ -428,6 +449,7 @@ def build(items):
             'id': it['uid'], 'c': b, 'all': allb, 'url': it.get('url'),
             'img': (imgs[0].get('large') or imgs[0].get('original')),
             'img2': imgs[0].get('original'),
+            'alt': [i.get('large') or i.get('original') for i in imgs[1:5]],   # rescue candidates if images[0] is a placeholder
             'title': (it.get('title') or '').strip(),
             'k': {  # pre-reveal clues
                 'y': y, 'age': age, 'rw': reward_amt(it),
@@ -446,19 +468,139 @@ def build(items):
             },
         }
         pcs = set(it.get('_pcs') or []) | {it.get('poster_classification')}
-        g, m, why = cats.assign(it.get('subjects'), pcs, text(it.get('description')), alltext + ' ' + (it.get('reward_text') or ''))
+        g, ok, m, why = cats.assign(it.get('subjects'), pcs, sus_charge(it) if sus else text(it.get('description')),
+                                    alltext + ' ' + (it.get('reward_text') or ''), main)
         c['sj'] = [s for s in (it.get('subjects') or []) if s] or None   # the FBI's own list names, verbatim
-        if b in ('missing', 'parental', 'seeking'): g, why = None, 'never scored (%s)' % b
-        c['g'] = g; c['m'] = m                                           # answer + every defensible match
+        if sus and g: c['sus'] = 1   # scored; c['c'] becomes the answer bucket after the clues are built
+        elif b in ('missing', 'parental', 'seeking'): g, ok, why = None, [], 'never scored (%s)' % b
+        if st != 'na': c['cap'] = st                                     # FBI API status: captured / surrendered
+        c['g'] = g; c['ok'] = ok; c['m'] = m                             # shown answer, every right answer, every defensible match
         if why: c['gx'] = why
         add_clues(c, names)
+        if c.get('sus') and ok == ['money'] and not re.search(r'fraud|scam|launder|embezzl|counterfeit', it.get('title') or '', re.I):
+            c.pop('sus'); c['g'], c['ok'], c['gx'] = None, [], 'unknown suspect; no FBI crime category'   # e.g. vandalism
+        if c.get('sus'): c['c'] = g; c['all'] = [g]
         cases.append(c)
     return cases, skipped
+
+# ---- DEA / Secret Service / U.S. Marshals wanted lists (tools/agencies.cjs -> agencies.json + .agimg/) ----
+AGF = os.path.join(ROOT, 'agencies.json'); AGRAW = os.path.join(ROOT, '.agimg')
+AG = {'dea': ('DEA Fugitives', 'DEA fugitive', 'DEA 通緝犯'), 'usss': ('U.S. Secret Service Most Wanted', 'Secret Service Most Wanted', '美國特勤局頭號通緝'),
+      'usms': ('U.S. Marshals 15 Most Wanted', 'U.S. Marshals 15 Most Wanted', '美國法警局 15 大通緝要犯')}
+CHILD = re.compile(r"\b(child|children|minor|juvenile|girl|boy|underage|years? old)\b", re.I)
+AG_STRICT = {
+    'violent': re.compile(r'murder|homicid|\bkill|manslaughter|assault|robbery|kidnap|abduct|hostage|shoot|carjack|arson|crime of violence|violent', re.I),
+    'gangs': re.compile(r'racketeer|(?<!puerto )\brico\b|criminal enterprise|criminal organization|organized crime|mafia|cartel|\bgangs?\b', re.I),
+    'money': re.compile(r'fraud|launder|embezzl|ponzi|securities|bribe|kickback|tax evasion|counterfeit|identity theft|\bscams?\b', re.I),
+    'cyber': re.compile(r'computer|hack|intrusion|malware|ransomware|botnet|cyber|phishing|unauthorized access|crypto|bitcoin|login credentials|online banking|digital currenc', re.I),
+    'terror': re.compile(r'terroris|material support|hijack|aircraft piracy|\bbomb|explosive', re.I),
+    'spy': re.compile(r'espionage|agents? of (a|the) foreign|foreign government|national defense information', re.I),
+    'drugs': re.compile(r'\bdrugs?\b|narcotic|cocaine|heroin|methamphetamine|fentanyl|marijuana|controlled substance|intent to distribute', re.I)}
+
+def agency_clues(k):
+    """Two clues from what the agency poster states, vaguest first (clue 1 is shown at once, clue 2 is the paid hint):
+    place / birth year / reward, then the redacted case text when there is one."""
+    v_en, v_zh = [], []
+    if k.get('pl'): v_en.append('Where: %s.' % k['pl']); v_zh.append('地點：%s。' % k['plz'])
+    if k.get('yb'): v_en.append('Year of birth on the poster: %d.' % k['yb']); v_zh.append('通緝海報上的出生年：%d 年。' % k['yb'])
+    if k.get('rw'): v_en.append('Reward: %s.' % _money_en(k['rw'])); v_zh.append('懸賞：%s。' % _money_zh(k['rw']))
+    ex = (k.get('ex') or '')
+    if len(ex) > 150: ex = ex[:150].rsplit(' ', 1)[0].rstrip(',;:') + ' …'
+    en, zh = v_en[:1], v_zh[:1]
+    if ex: en.append('“%s”' % ex); zh.append('〔英文原文〕“%s”' % ex)
+    else: en += v_en[1:2]; zh += v_zh[1:2]
+    if not en: en, zh = ['No reward listed.'], ['沒有列出懸賞。']
+    return {'en': en[:2], 'zh': zh[:2]}
+
+def add_agencies(cases):
+    """Append the other agencies' fugitives. Child-sex cases are left out entirely; other graphic sentences are cut."""
+    from PIL import Image
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import cats
+    try: d = json.load(open(AGF))
+    except Exception: print('no agencies.json'); return cases, {}
+    have = {c['id'] for c in cases}; out = []; sk = {}
+    def skip(r): sk[r] = sk.get(r, 0) + 1
+    allnames = set()   # co-defendants are on each other's pages: redact every listed name from every clue
+    for it in d.get('items') or []: allnames |= names_of({'title': it.get('name') or ''})
+    AGW = re.compile(r'Marshal|\bDEA\b|Drug Enforcement|Secret Service|USSS|USMS|If (the )?subject|If you have|contact the', re.I)
+    raw = {f.split('.')[0]: f for f in (os.listdir(AGRAW) if os.path.isdir(AGRAW) else [])}
+    for it in d.get('items') or []:
+        if it['id'] in have: continue
+        ch = (it.get('d') or '').strip(); story = [x for x in (it.get('t') or []) if x]
+        if it['src'] == 'usms' and story:   # the Marshals' card line is the charge summary: "X is wanted (by ...) for A, B and C."
+            card, story = story[0], story[1:]
+            mm = re.search(r'\bwanted (?:by [^.]*? )?for (?:the )?(.+?)(?:\.|$)', card, re.I)
+            ch = '; '.join(x.strip() for x in re.split(r',\s*(?:and\s+)?|\s+and\s+', mm.group(1)) if x.strip()) if mm else card
+        if it['src'] == 'dea': ch = '; '.join(x.strip() for x in re.split(r'\.\s+|;\s*', ch.rstrip('. ')) if x.strip())
+        alltext = ch + ' ' + ' '.join(story)
+        if (GRAPHIC.search(alltext) and CHILD.search(alltext)) or re.search(r'child (sex|porn|exploit|molest)|sexual\w* (abuse|assault|exploit)\w* (of )?(a )?(child|minor)|'
+                                                                            r'(to|of|against) (a|the) (child|minor)|\b([1-9]|1[0-7])[- ]year[- ]old', alltext, re.I):   # crimes against children: never in the game
+            skip('child-sex'); continue
+        rawtext = alltext
+        story = [x for x in sentences(' '.join(story)) if not GRAPHIC.search(x) and not PHYS.search(x) and not re.search(r'NOTICE TO LAW ENFORCEMENT|\bNCIC\b|whereabouts known|presumed innocent', x, re.I)][:8]
+        if GRAPHIC.search(ch): ch = '; '.join(x.strip() for x in re.split(r',|;| and ', re.sub(r'\.$', '', ch)) if x.strip() and not GRAPHIC.search(x)) or ''
+        fn = it['id'] + '.webp'; p = os.path.join(IMG, fn)
+        if not (os.path.exists(p) and os.path.getsize(p) > 400):
+            r = raw.get(it['id'])
+            if not r: skip('noimage'); continue
+            try:
+                im = Image.open(os.path.join(AGRAW, r)).convert('RGB'); im.thumbnail((300, 380)); im.save(p, 'WEBP', quality=72, method=6)
+            except Exception: skip('badimage'); continue
+        src = it['src']; lst, en, zh = AG[src]
+        g, ok, m, why = cats.assign([lst] if src == 'dea' else [], set(), ch or ' '.join(story[:1]), rawtext, ' '.join(story))
+        hits = cats.text_hits(ch)
+        # other agencies have no FBI-style crime lists: a right answer needs the agency's own charge wording (strict words only)
+        base = ch or ' '.join(story[:3])
+        strict = {k for k, r in AG_STRICT.items() if r.search(base)} or {k for k, r in AG_STRICT.items() if r.search(' '.join(story))}
+        if src != 'dea' and g:
+            keep = [x for x in ok if x in strict] or [x for x in sorted(strict) if x in m] or ok
+            if src == 'usss' and set(keep) & {'money', 'cyber'}: keep = [x for x in keep if x != 'terror']   # e.g. laundering FOR terror groups: still a financial case
+            ok = sorted(keep); g = next(x for x in cats.PRIMARY if x in ok); m = sorted(set(m) | set(ok))
+        if src == 'dea' and g: ok = sorted(set(ok) | (hits & {'money', 'cyber'}) | ({'terror'} if re.search(r'terror', ch, re.I) else set()) | ({'violent'} if re.search(r'murder|homicide|kidnap|\bkill', ch, re.I) else set())); m = sorted(set(m) | set(ok))   # e.g. drugs + money laundering; 'conspiracy' alone stays defensible, not right
+        if src == 'usss' and g and not set(ok) & {'money', 'cyber'}: why = (why or '') + ' (Secret Service: no money/cyber wording)'
+        names = allnames
+        ex = excerpt([x for x in story if not AGW.search(x)], names) if story else ''
+        if src == 'dea' and it.get('rw'): it = dict(it, rw=re.sub(r'(?i)^reward:\s*', '', it['rw']))
+        c = {'id': it['id'], 'c': g or 'seeking', 'all': [g] if g else [], 'url': it['url'], 'title': it.get('name') or '',
+             'src': src, 'ag': {'en': en, 'zh': zh}, 'im': 'img/' + fn,
+             'k': {'y': None, 'age': None, 'rw': reward_amt({'reward_text': re.sub(r'(\d)\s*M\b', r'\1 million', it['rw']) if it.get('rw') else ''}), 'of': None, 'ofz': None, 'pl': None, 'plz': None, 'lg': None, 'lgz': None, 'oc': None, 'ex': ex or None},
+             'r': {'d': ch or None, 't': story, 'rm': [], 'rw': it.get('rw'), 'w': None, 'sex': None, 'cap': None},
+             'sj': [lst], 'g': g, 'ok': ok, 'm': m}
+        if why: c['gx'] = why
+        pl = it.get('pl') if it.get('pl') and not AGW.search(it['pl']) and not CAT_RE.search(it['pl']) else None
+        plz = None
+        if pl:   # DEA tags the federal court district: "California Central" -> "Central District of California"
+            mm = re.match(r'^(.+?)\s+(Northern|Southern|Eastern|Western|Central|Middle)$', pl)
+            if mm: plz = STATES.get(mm.group(1), mm.group(1)) + {'Northern': '北區', 'Southern': '南區', 'Eastern': '東區', 'Western': '西區', 'Central': '中區', 'Middle': '中區'}[mm.group(2)] + '（聯邦法院轄區）'; pl = '%s District of %s' % (mm.group(2), mm.group(1))
+            else: plz = zh_place(pl)
+        if pl: c['k']['pl'] = pl; c['k']['plz'] = plz
+        if it.get('nt') and re.search(r'armed|dangerous|caution', it['nt'], re.I): c['r']['w'] = it['nt'].strip()
+        if it.get('yb'): c['k']['yb'] = it['yb']
+        c['k']['cl'], c['k']['cs'] = agency_clues(c['k']), 'a'
+        c['k']['mt'] = meta_line(dict(c['k'], pl=None))   # the place is already clue 1
+        if not g: skip('nocategory')
+        out.append(c)
+    live = {it['id'] for it in d.get('items') or []}
+    for f in os.listdir(IMG):   # a fugitive the agency took down: drop the cached portrait too
+        if f.startswith(('dea-', 'usss-', 'usms-')) and f.rsplit('.', 1)[0] not in live: os.remove(os.path.join(IMG, f))
+    print('agencies', {s: sum(c['src'] == s for c in out) for s in AG}, 'scored', sum(1 for c in out if c['g']), 'skipped', sk)
+    return cases + out, sk
 
 RES_OK = {'captured', 'surrendered', 'located', 'recovered', 'resolved'}
 def resolved(items):
     """uid -> status, only where the FBI API itself marks the case resolved (used by the casebook)."""
     return {it['uid']: it['status'] for it in items if it.get('uid') and (it.get('status') or 'na') in RES_OK}
+
+def wayback_img(u):
+    """The FBI's own portrait from the Internet Archive's copy (availability API -> exact snapshot, raw 'id_' bytes)."""
+    for v in (u, re.sub(r'/large$', '/preview', u)):
+        raw, _ = get('https://archive.org/wayback/available?url=' + urllib.parse.quote(v.split('://', 1)[-1], safe='/@'), tries=1, kind='img'); time.sleep(2)
+        try: snap = json.loads(raw or b'{}').get('archived_snapshots', {}).get('closest') or {}
+        except ValueError: snap = {}
+        if snap.get('available') and snap.get('timestamp'):
+            data, ct = get('https://web.archive.org/web/%sid_/%s' % (snap['timestamp'], v), tries=1, kind='img'); time.sleep(2)
+            if data and ct.startswith('image/'): return data, ct
+    return None, ''
 
 def cache_images(cases, prev_ids):
     """Download + shrink portraits for NEW cases only; delete images of pruned cases."""
@@ -473,8 +615,12 @@ def cache_images(cases, prev_ids):
     today = datetime.date.today()
     ids = {c['id'] for c in cases}
     failed = {k: v for k, v in failed.items() if k in ids}
+    ALTS = {}
+    for f in os.listdir(IMG):
+        if '_' in f: ALTS.setdefault(f.split('_')[0], []).append(f)
     for c in cases:
         fn = c['id'] + '.webp'; p = os.path.join(IMG, fn)
+        for f in ALTS.get(c['id'], []): keep.add(f)   # a rescued alternate portrait (rescue_images)
         if os.path.exists(p) and os.path.getsize(p) > 400:
             c['im'] = 'img/' + fn; keep.add(fn); continue
         if REQ['img'] >= MAX_IMG: continue   # rest next day
@@ -483,6 +629,8 @@ def cache_images(cases, prev_ids):
         time.sleep(1.0)
         if not (data and ct.startswith('image/')) and c.get('img2') and c['img2'] != c['img']:
             data, ct = get(c['img2'], tries=1, kind='img'); time.sleep(1.0)
+        if not (data and ct.startswith('image/')) and c.get('cap'):
+            data, ct = wayback_img(c['img'])   # captured posters vanish from fbi.gov; the Internet Archive kept the FBI's own image
         if not (data and ct.startswith('image/')):
             failed[c['id']] = today.isoformat(); continue
         failed.pop(c['id'], None)
@@ -495,9 +643,46 @@ def cache_images(cases, prev_ids):
             print('img fail', c['id'], e, file=sys.stderr)
     json.dump(failed, open(FAILF, 'w'), indent=0, sort_keys=True)
     for f in os.listdir(IMG):
-        if f not in keep:
+        if f not in keep and not f.startswith(('dea-', 'usss-', 'usms-')):   # agency portraits: add_agencies owns them
             os.remove(os.path.join(IMG, f))
-    for c in cases: c.pop('img', None); c.pop('img2', None)   # clients never touch fbi.gov images
+    for c in cases: c.pop('img', None); c.pop('img2', None)   # clients never touch fbi.gov images (c['alt'] goes after rescue)
+
+ALTF = os.path.join(ROOT, 'img_alt.json')
+def rescue_images(cases):
+    """Scored-poster cases whose first FBI image failed the face check: try the poster's other images (max 4) once.
+    The result is remembered in img_alt.json ({id: index used, or 0 = none usable}) so the daily run never re-asks."""
+    from PIL import Image
+    import io
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import faces
+    try: done = json.load(open(ALTF))
+    except Exception: done = {}
+    ids = {c['id'] for c in cases}; done = {k: v for k, v in done.items() if k in ids}
+    n = 0
+    for c in cases:
+        alt = c.pop('alt', None) or []
+        if c.get('fq') or not c.get('g') or c.get('c') in faces.NEVER: continue
+        k = done.get(c['id'])
+        if k:   # rescued earlier: reuse the cached file
+            fn = '%s_%d.webp' % (c['id'], k)
+            if os.path.exists(os.path.join(IMG, fn)): c['im'] = 'img/' + fn; c['ii'] = k; faces.mark([c])
+            continue
+        if k == 0 or not alt: continue
+        done[c['id']] = 0
+        for j, u in enumerate(alt, 1):
+            if REQ['img'] >= MAX_IMG: done.pop(c['id'], None); break
+            data, ct = get(u, tries=2, kind='img'); time.sleep(1.0)
+            if not (data and ct.startswith('image/')): continue
+            try:
+                im = Image.open(io.BytesIO(data)).convert('RGB'); im.thumbnail((300, 380))
+                fn = '%s_%d.webp' % (c['id'], j); p = os.path.join(IMG, fn); im.save(p, 'WEBP', quality=72, method=6)
+            except Exception: continue
+            t = dict(c, im='img/' + fn, ii=j)
+            if faces.mark([t]):
+                c['im'] = t['im']; c['ii'] = j; done[c['id']] = j; n += 1; break
+            os.remove(p)
+    json.dump(done, open(ALTF, 'w'), indent=0, sort_keys=True)
+    print('rescued portraits', n)
+    return n
 
 def _faces(cases):
     try:
@@ -525,7 +710,10 @@ def main():
     print('requests so far: api=%d' % REQ['api'])
     if '--no-images' not in sys.argv:
         cache_images(cases, None); cases = [c for c in cases if c.get('im')]
+    cases, _ = add_agencies(cases)
     _faces(cases)
+    if '--no-images' not in sys.argv: rescue_images(cases)
+    for c in cases: c.pop('alt', None)
     mix = {}
     for c in cases: mix[c['c']] = mix.get(c['c'], 0) + 1
     out = {'updated': datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%MZ'), 'total': total,
@@ -564,9 +752,10 @@ if __name__ == '__main__':
             if not it: continue
             alltext = ' '.join([it.get('title') or '', text(it.get('description')), text(it.get('caution')), text(it.get('details')),
                                 text(it.get('remarks')), text(it.get('additional_information')), it.get('reward_text') or ''])
-            g, m, why = cats.assign(it.get('subjects'), set(it.get('_pcs') or []) | {it.get('poster_classification')}, text(it.get('description')), alltext)
-            if c['c'] in ('missing', 'parental', 'seeking'): g, why = None, 'never scored (%s)' % c['c']
-            c['sj'] = [s for s in (it.get('subjects') or []) if s] or None; c['g'] = g; c['m'] = m; c.pop('gx', None)
+            g, ok, m, why = cats.assign(it.get('subjects'), set(it.get('_pcs') or []) | {it.get('poster_classification')},
+                                        sus_charge(it) if c.get('sus') else text(it.get('description')), alltext, text(it.get('caution')) or text(it.get('details')))
+            if c['c'] in ('missing', 'parental', 'seeking') and not c.get('sus'): g, ok, why = None, [], 'never scored (%s)' % c['c']
+            c['sj'] = [s for s in (it.get('subjects') or []) if s] or None; c['g'] = g; c['ok'] = ok; c['m'] = m; c.pop('gx', None)
             if why: c['gx'] = why
             n += 1
         open(OUT, 'w').write(json.dumps(d, ensure_ascii=False, separators=(',', ':'))); print('reclassified', n, 'of', len(d['cases'])); sys.exit(0)

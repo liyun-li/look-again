@@ -24,7 +24,7 @@ def mark(cases):
     for c in cases:
         c.pop('fq', None)
         im = c.get('im')
-        if not im or c['id'] in skip or c.get('c') in NEVER: continue   # victims / missing people are never game rounds
+        if not im or (c['id'] in skip and not c.get('ii')) or c.get('c') in NEVER: continue   # victims / missing people are never game rounds
         p = os.path.join(ROOT, im)
         if not os.path.exists(p) or os.path.getsize(p) < 2000: continue
         try: s = Image.open(p).convert('RGB').resize((16, 16)).tobytes()

@@ -1,2 +1,4 @@
 __pycache__/
 refresh.log
+.agimg/
+node_modules/
