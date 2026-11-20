@@ -23,6 +23,8 @@ jobs:
       - run: pip install --quiet pillow
       - name: Fetch, filter, cache portraits, prune
         run: python tools/build_cases.py | tee refresh.log
+      - name: Check every round has exactly one fitting option
+        run: node tools/check_rounds.mjs cases.json --prune
       - name: Commit only if something changed
         run: |
           git config user.name "look-again-bot"

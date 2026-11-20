@@ -5,6 +5,8 @@ Rules: no race/ethnicity/physical-description text, no sex before reveal, no gor
 or unidentified-remains or homicide/sexual-assault ViCAP files, no deceased-victim cases.
 Case text is the FBI's own wording (sentences may be dropped, never rewritten)."""
 import json, re, os, sys, time, html, urllib.request, urllib.error, hashlib, datetime
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import cats  # answer categories from the FBI's own lists (see cats.py)
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, 'cases.json')
@@ -443,6 +445,12 @@ def build(items):
                 'cap': (imgs[0].get('caption') or '').strip() or None,
             },
         }
+        pcs = set(it.get('_pcs') or []) | {it.get('poster_classification')}
+        g, m, why = cats.assign(it.get('subjects'), pcs, text(it.get('description')), alltext + ' ' + (it.get('reward_text') or ''))
+        c['sj'] = [s for s in (it.get('subjects') or []) if s] or None   # the FBI's own list names, verbatim
+        if b in ('missing', 'parental', 'seeking'): g, why = None, 'never scored (%s)' % b
+        c['g'] = g; c['m'] = m                                           # answer + every defensible match
+        if why: c['gx'] = why
         add_clues(c, names)
         cases.append(c)
     return cases, skipped
@@ -548,6 +556,20 @@ if __name__ == '__main__':
         _faces(d['cases'])
         open(OUT, 'w').write(json.dumps(d, ensure_ascii=False, separators=(',', ':')))
         print('reclued', len(d['cases']), 'sources', {x: sum(c['k']['cs'] == x for c in d['cases']) for x in '2lf'}); sys.exit(0)
+    if '--reclassify' in sys.argv:   # offline: re-apply cats.py to the cached cases.json from a raw API dump
+        d = json.load(open(OUT)); raw = {it['uid']: it for it in dedupe(json.load(open(sys.argv[sys.argv.index('--reclassify') + 1])))}
+        n = 0
+        for c in d['cases']:
+            it = raw.get(c['id'])
+            if not it: continue
+            alltext = ' '.join([it.get('title') or '', text(it.get('description')), text(it.get('caution')), text(it.get('details')),
+                                text(it.get('remarks')), text(it.get('additional_information')), it.get('reward_text') or ''])
+            g, m, why = cats.assign(it.get('subjects'), set(it.get('_pcs') or []) | {it.get('poster_classification')}, text(it.get('description')), alltext)
+            if c['c'] in ('missing', 'parental', 'seeking'): g, why = None, 'never scored (%s)' % c['c']
+            c['sj'] = [s for s in (it.get('subjects') or []) if s] or None; c['g'] = g; c['m'] = m; c.pop('gx', None)
+            if why: c['gx'] = why
+            n += 1
+        open(OUT, 'w').write(json.dumps(d, ensure_ascii=False, separators=(',', ':'))); print('reclassified', n, 'of', len(d['cases'])); sys.exit(0)
     if '--from' in sys.argv:
         items = json.load(open(sys.argv[sys.argv.index('--from') + 1]))
         cases, skipped = build(items)

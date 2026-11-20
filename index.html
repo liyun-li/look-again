@@ -133,6 +133,7 @@ html[lang^=zh] .rhead .en{font-weight:600;font-size:.86em;color:#4b453a;-webkit-
 .hfc .t{font-weight:900;color:var(--amb);text-decoration:none;border:1px solid #f0b42966;border-radius:.3rem;padding:.3em 0;text-align:center;min-height:1.5rem;display:flex;align-items:center;justify-content:center}
 .toast:empty{display:none}
 .toast{font-weight:800;color:var(--amb);font-size:.85rem;white-space:pre-line}
+.rcat .fl{display:block;font-size:.55em;font-weight:700;color:#5e5646;white-space:normal;margin-top:.15em}
 /* dialog */
 dialog{margin:auto;width:min(100% - 1.2rem,34rem);max-height:calc(100dvh - 1.2rem);border:0;border-radius:.6rem;background:var(--pap);color:var(--pink);padding:0;overflow:hidden}
 dialog::backdrop{background:#000b}
@@ -285,16 +286,18 @@ const STAT=(()=>{const EP='https://game-stats.coach-backend.workers.dev/e',SRC='
  return {send,rid}})();
 
 const PTS=[3,1],LIVES=3,DOCKET=5,EPOCH=Date.UTC(2026,10,2),GUARD=350;
-// FBI list -> game category. Missing persons, parental kidnapping and "seeking information" files are never scored.
-const GMAP={violent:'violent',topten:'violent',gangs:'gangs',money:'money',cyber:'cyber',spy:'spy',terror:'terror'};
+// Categories = the FBI's own crime lists (cases.json g = answer, m = every category the case defensibly matches; built by tools/cats.py).
+// A round only ever shows the answer plus categories outside m, so two options can never both be right.
+// Missing persons, parental kidnapping and "seeking information" files have no g and are never scored.
+const GMAP={violent:'violent',topten:'violent',gangs:'gangs',money:'money',cyber:'cyber',spy:'spy',terror:'terror'};// legacy casebook entries only
 const GROUPS=['violent','gangs','money','cyber','spy','terror'];
 const SEV={violent:3,terror:3,gangs:2,spy:1,money:0,cyber:0};
 const CAT={
  violent:{e:"🔪",en:"Violent crime",zh:"暴力犯罪"},
- gangs:{e:"💊",en:"Gangs & cartels",zh:"幫派與販毒"},
- money:{e:"💸",en:"Fraud & money",zh:"詐騙與洗錢"},
- cyber:{e:"💻",en:"Hacking",zh:"駭客入侵"},
- spy:{e:"🕵️",en:"Spies & foreign agents",zh:"間諜與境外勢力"},
+ gangs:{e:"🕴️",en:"Criminal enterprise",zh:"犯罪集團"},
+ money:{e:"💸",en:"White-collar crime",zh:"白領犯罪"},
+ cyber:{e:"💻",en:"Cyber crime",zh:"網路犯罪"},
+ spy:{e:"🕵️",en:"Counterintelligence",zh:"反情報（間諜）"},
  terror:{e:"💣",en:"Terrorism",zh:"恐怖主義"}};
 const catTxt=g=>CAT[g].e+' '+CAT[g][L];
 const S={en:{
@@ -307,7 +310,7 @@ const S={en:{
  loading:"Pulling the poster…",retry:"RETRY",loadFail:"Couldn’t load the posters.",
  legal:"Charges are allegations. Everyone is presumed innocent until proven guilty.",
  about:"About & data",tipline:"FBI tip line",updated:(d,n)=>`FBI data refreshed ${d} · ${n} faces in play`,
- q:"Wanted for…?",caseD:(i,n)=>`${i}/${n}`,
+ q:"The FBI files them under…?",caseD:(i,n)=>`${i}/${n}`,
  peek:"💡 Peek at a clue",peekCost:"+3 → +1",peeked:"Clue used · now +1",
  right:p=>`✓ Called it! +${p}`,wrong:"✗ Your gut lied",
  wantedFor:"Wanted for",moreCh:n=>` (+${n} more)`,
@@ -329,7 +332,7 @@ const S={en:{
  bookIntro:(n,k)=>`${n} faces played${k?` · ${k} no longer listed`:''}`,
  closed:"No longer on the FBI list",closedWhy:"The FBI took this poster down. That can mean an arrest, a resolution, or another reason; the FBI doesn’t always say.",
  stillOpen:"Still on the FBI list",played:d=>`played ${d}`,
- fullFiled:"FBI list",fullDesc:"Charges",fullText:"Details (FBI wording)",fullRm:"Remarks",fullRw:"Reward",fullW:"Warning",
+ fullFiled:"FBI list",onList:"FBI list:",fullDesc:"Charges",fullText:"Details (FBI wording)",fullRm:"Remarks",fullRw:"Reward",fullW:"Warning",
  cutNote:"Physical descriptions are left out here. The FBI page has the full poster."
 },zh:{
  tag:"真實 FBI 通緝照。看臉，猜罪名。你的直覺準備被打臉。",
@@ -341,7 +344,7 @@ const S={en:{
  loading:"調閱通緝照中…",retry:"重試",loadFail:"通緝資料載入失敗。",
  legal:"起訴內容僅為指控，未經法院定罪前，任何人皆推定無罪。",
  about:"關於與資料來源",tipline:"FBI 線索專線",updated:(d,n)=>`FBI 資料更新於 ${d}・共 ${n} 張臉`,
- q:"通緝罪名是？",caseD:(i,n)=>`${i}/${n}`,
+ q:"FBI 把這個人歸在哪一類？",caseD:(i,n)=>`${i}/${n}`,
  peek:"💡 偷看線索",peekCost:"+3 → +1",peeked:"已看線索・現在 +1",
  right:p=>`✓ 一眼看穿！+${p}`,wrong:"✗ 被直覺騙了",
  wantedFor:"涉嫌",moreCh:n=>`（另有 ${n} 項）`,
@@ -363,7 +366,7 @@ const S={en:{
  bookIntro:(n,k)=>`玩過 ${n} 張${k?`・${k} 張已不在名單上`:''}`,
  closed:"已不在 FBI 名單上",closedWhy:"FBI 已撤下這張公告。可能是已逮捕、已解決或其他原因，FBI 不一定會說明。",
  stillOpen:"仍在 FBI 名單上",played:d=>`${d} 玩過`,
- fullFiled:"FBI 名單",fullDesc:"罪名",fullText:"案情（FBI 英文原文）",fullRm:"備註",fullRw:"懸賞",fullW:"警告",
+ fullFiled:"FBI 名單",onList:"FBI 名單：",fullDesc:"罪名",fullText:"案情（FBI 英文原文）",fullRm:"備註",fullRw:"懸賞",fullW:"警告",
  cutNote:"此處略去外貌描述；完整公告請見 FBI 官方頁面。"
 }};
 const $=id=>document.getElementById(id);
@@ -379,12 +382,14 @@ function shuf(a,r=Math.random){for(let i=a.length-1;i>0;i--){const j=r()*(i+1)|0
 // Daily resets at midnight Asia/Taipei for everyone.
 function today(){const d=new Date(Date.now()+8*36e5);return d.toISOString().slice(0,10)}
 function dayNo(day){const [y,m,d]=day.split('-').map(Number);return Math.round((Date.UTC(y,m-1,d)-EPOCH)/864e5)+1}
-function grp(c){return GMAP[c.c]}
-function grpSet(c){const s=new Set([grp(c)]);for(const a of c.all||[])if(GMAP[a])s.add(GMAP[a]);return s}
+function grp(c){return c.g}
+function grpSet(c){return new Set([c.g,...(c.m||[])])}
+function freeOf(c){const set=grpSet(c);return GROUPS.filter(x=>!set.has(x)&&(POOL[x]||[]).length)}
 async function getJSON(u,tries){for(let k=0;k<tries;k++){try{const r=await fetch(u,{cache:'no-cache'});if(!r.ok)throw 0;return await r.json()}catch(e){if(k<tries-1)await new Promise(r=>setTimeout(r,600*(k+1)))}}throw new Error('load')}
 let loadP=null;
 function boot(){loadP=getJSON('cases.json',3).then(d=>{if(!d.cases||!d.cases.length)throw new Error('empty');DATA=d;BYID={};POOL={};MISSING=[];
- for(const c of d.cases){BYID[c.id]=c;const g=grp(c);if(g&&c.im&&c.fq)(POOL[g]=POOL[g]||[]).push(c);else if(c.c==='missing'&&c.im)MISSING.push(c)}
+ for(const c of d.cases){BYID[c.id]=c;const g=grp(c);if(g&&GROUPS.includes(g)&&Array.isArray(c.m)&&c.im&&c.fq)(POOL[g]=POOL[g]||[]).push(c);else if(c.c==='missing'&&c.im)MISSING.push(c)}
+ for(const g in POOL)POOL[g]=POOL[g].filter(c=>freeOf(c).length>=2);
  if(!GROUPS.some(g=>(POOL[g]||[]).length))throw new Error('empty');
  $('upd').textContent=T('updated')(fmtDate(d.updated),poolN());renderStart();return d});
  return loadP}
@@ -403,7 +408,7 @@ function docketIds(day){const r=rng('face|'+day),cnt={},ids=[];
  for(const g0 of plan){let g=g0;if(!(POOL[g]||[]).length)g=GROUPS.find(x=>(POOL[x]||[]).length);
   const best=POOL[g].filter(c=>!ids.includes(c.id)).map(c=>[h32(day+'|'+c.id),c.id]).sort((a,b)=>a[0]-b[0])[0];if(best)ids.push(best[1])}
  return ids}
-function optsFor(c,r=Math.random){const set=grpSet(c),g=grp(c);const d=shuf(GROUPS.filter(x=>!set.has(x)&&(POOL[x]||[]).length),r).slice(0,3);return shuf([g,...d],r)}
+function optsFor(c,r=Math.random){const d=shuf(freeOf(c),r).slice(0,3);return shuf([grp(c),...d],r)}
 function pickEndless(){const seen=new Set(LS.get('la2_seen')||[]);const used=new Set(run?run.ids:[]);
  const gs=GROUPS.filter(g=>(POOL[g]||[]).length);const last=run&&run.ids.length?grp(BYID[run.ids[run.ids.length-1]]):null;
  let g=gs[Math.random()*gs.length|0];if(g===last&&gs.length>1)g=gs[Math.random()*gs.length|0];
@@ -411,6 +416,11 @@ function pickEndless(){const seen=new Set(LS.get('la2_seen')||[]);const used=new
 function newDaily(){const day=today(),ids=docketIds(day),r=rng('fopts|'+day);run={mode:'d',day,ids,opts:ids.map(id=>optsFor(BYID[id],r)),i:0,pk:0,res:[],x:STAT.rid()};save()}
 function newEndless(){run={mode:'e',ids:[],opts:[],i:0,pk:0,res:[],lives:LIVES,x:STAT.rid()};addEndless();save()}
 function addEndless(){const id=pickEndless();run.ids.push(id);run.opts.push(optsFor(BYID[id]))}
+// a saved run resumes only if its unplayed rounds are still playable; options saved under an older scheme are re-dealt
+function fixRun(r){if(!Array.isArray(r.ids)||!Array.isArray(r.opts)||!Array.isArray(r.res))return false;
+ for(let j=r.res.length;j<r.ids.length;j++){const c=BYID[r.ids[j]];if(!c||!POOL[grp(c)]||!POOL[grp(c)].includes(c))return false;
+  const o=r.opts[j],set=grpSet(c);if(!Array.isArray(o)||!o.includes(grp(c))||o.filter(b=>set.has(b)).length!==1||o.some(b=>!CAT[b]))r.opts[j]=optsFor(c)}
+ return true}
 const MODE=r=>r.mode==='d'?'daily':'endless';
 function save(){LS.set(run.mode==='d'?'la4_daily':'la4_endless',run)}
 function cur(){return BYID[run.ids[run.i]]}
@@ -451,7 +461,7 @@ function renderReveal(re){const c=cur(),x=run.res[run.i],g=grp(c),ch=chargeOf(c)
  $('worth').hidden=true;
  const st=$('stamp');st.className='stamp on '+(x.ok?'ok':'no');st.textContent=x.ok?`+${x.p}`:'✗';
  $('verdict').textContent=x.ok?T('right')(x.p):T('wrong');$('verdict').className='verdict '+(x.ok?'ok':'no');
- $('rcat').innerHTML=`<span aria-hidden="true">${CAT[g].e}</span> ${esc(CAT[g][L])}`+(x.ok?'':` <s>${esc(CAT[x.b].e+' '+CAT[x.b][L])}</s>`);
+ $('rcat').innerHTML=`<span aria-hidden="true">${CAT[g].e}</span> ${esc(CAT[g][L])}`+(x.ok?'':` <s>${esc(CAT[x.b].e+' '+CAT[x.b][L])}</s>`)+(c.sj&&c.sj.length?`<small class="fl">${esc(T('onList'))} <span lang="en">${esc(c.sj.join(' · '))}</span></small>`:'');
  $('rname').textContent=titleCase(nameOf(c));
  let h='';
  if(L==='zh'){h+=`<span class="zh"><b>${esc(ch.q?'FBI 要約談':T('wantedFor'))}</b>${ch.zh?'：'+esc(ch.zh):''}</span>`;
@@ -466,7 +476,7 @@ function renderReveal(re){const c=cur(),x=run.res[run.i],g=grp(c),ch=chargeOf(c)
 function lineOf(c,ch){if(L==='zh'){const cl=clueOf(c);const z=cl.length>1&&run.pk?cl[1]:cl[0];return z?hl(z):''}
  const t=(c.r.t||[]);for(const s0 of t){const s=firstSentence(s0);if(s&&s.indexOf(ch.head.replace(/…$/,''))<0)return esc(clip(s,170))}return ''}
 function fullPoster(){const c=cur(),r=c.r;let h='';
- h+=`<h3>${esc(T('fullFiled'))}</h3><p>${esc(catTxt(grp(c)))}</p>`;
+ h+=`<h3>${esc(T('fullFiled'))}</h3><p>${esc(catTxt(grp(c)))}${c.sj&&c.sj.length?` · <span lang="en">${esc(c.sj.join(' · '))}</span>`:''}</p>`;
  if(r.w)h+=`<p class="w" lang="en">${esc(r.w)}</p>`;
  if(r.d)h+=`<h3>${esc(T('fullDesc'))}</h3><p lang="en">${esc(r.d)}</p>`;
  if(r.t&&r.t.length)h+=`<h3>${esc(T('fullText'))}</h3>`+r.t.map(s=>`<p lang="en">${esc(s)}</p>`).join('');
@@ -554,8 +564,8 @@ async function start(mode){
  $('loading').hidden=true;$('game').classList.remove('wait');
  if(mode==='d'){const day=today(),res=(LS.get('la4_dres')||{})[day];
   if(res){const d=LS.get('la4_daily');lastEnd=d&&d.day===day?d:{mode:'d',day,ids:res.ids,res:res.res};show('end');renderEnd();return}
-  const d=LS.get('la4_daily');if(d&&d.day===day&&d.ids.every(i=>BYID[i]))run=d;else newDaily()}
- else{const e=LS.get('la4_endless');if(e&&e.lives>0&&e.ids.every(i=>BYID[i]))run=e;else newEndless()}
+  const d=LS.get('la4_daily');if(d&&d.day===day&&fixRun(d))run=d;else newDaily()}
+ else{const e=LS.get('la4_endless');if(e&&e.lives>0&&fixRun(e))run=e;else newEndless()}
  if(!run.x){run.x=STAT.rid();save()}STAT.send('start',{m:MODE(run),x:run.x,n:run.i});
  renderRound(true);$('b0')&&$('b0').focus({preventScroll:true})}
 $('dailyBtn').onclick=()=>start('d');$('endlessBtn').onclick=()=>start('e');
@@ -579,7 +589,7 @@ addEventListener('keydown',e=>{if($('dlg').open||!$('game').classList.contains('
 applyLang();STAT.send('view');
 if(/(^|[?&])daily\b/.test(location.search.slice(1)))start('d');
 </script>
-<!--howto--><script>(()=>{const D={"en": {"title": "🔎 Look Again", "steps": ["A real FBI wanted poster. Just the face.", "Guess what they’re wanted for. One tap.", "Gut call: +3. After a 💡 peek at a clue: +1."], "example": "<style>@media (orientation:landscape) and (max-height:520px){.mx-look{display:none}}</style><div class=\"mx-look\"><div aria-hidden=\"true\" style=\"display:flex;gap:.6em;align-items:stretch;font-size:.85em\">\n<div style=\"flex:none;width:4.2em;aspect-ratio:3/4;border-radius:.45em;background:#ece6d6;color:#1d1b17;display:flex;align-items:center;justify-content:center;font:900 1.9em system-ui,sans-serif;position:relative\">?<span style=\"position:absolute;top:.25em;right:.25em;background:#f0b429;color:#111;border-radius:999px;font-size:.36em;padding:0 .45em\">+3</span></div>\n<div style=\"flex:1;display:grid;grid-template-columns:1fr 1fr;gap:.35em;align-content:center\"><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">🔪 Violent</span><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">💸 Fraud</span><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">💻 Hacking</span><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">💣 Terror</span></div></div></div>"}, "zh": {"title": "🔎 再看一眼", "steps": ["一張真實的 FBI 通緝照，只看臉。", "猜猜這個人為什麼被通緝，點一下就好。", "憑直覺猜中 +3；偷看 💡 線索再猜中 +1。"], "example": "<style>@media (orientation:landscape) and (max-height:520px){.mx-look{display:none}}</style><div class=\"mx-look\"><div aria-hidden=\"true\" style=\"display:flex;gap:.6em;align-items:stretch;font-size:.85em\">\n<div style=\"flex:none;width:4.2em;aspect-ratio:3/4;border-radius:.45em;background:#ece6d6;color:#1d1b17;display:flex;align-items:center;justify-content:center;font:900 1.9em system-ui,sans-serif;position:relative\">?<span style=\"position:absolute;top:.25em;right:.25em;background:#f0b429;color:#111;border-radius:999px;font-size:.36em;padding:0 .45em\">+3</span></div>\n<div style=\"flex:1;display:grid;grid-template-columns:1fr 1fr;gap:.35em;align-content:center\"><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">🔪 暴力</span><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">💸 詐騙</span><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">💻 駭客</span><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">💣 恐攻</span></div></div></div>"}},K="howto_la4",UI={en:{ok:"Got it",q:"How to play"},zh:{ok:"懂了",q:"怎麼玩"}};
+<!--howto--><script>(()=>{const D={"en": {"title": "🔎 Look Again", "steps": ["A real FBI wanted poster. Just the face.", "Guess which FBI list they’re on. One tap.", "Gut call: +3. After a 💡 peek at a clue: +1."], "example": "<style>@media (orientation:landscape) and (max-height:520px){.mx-look{display:none}}</style><div class=\"mx-look\"><div aria-hidden=\"true\" style=\"display:flex;gap:.6em;align-items:stretch;font-size:.85em\">\n<div style=\"flex:none;width:4.2em;aspect-ratio:3/4;border-radius:.45em;background:#ece6d6;color:#1d1b17;display:flex;align-items:center;justify-content:center;font:900 1.9em system-ui,sans-serif;position:relative\">?<span style=\"position:absolute;top:.25em;right:.25em;background:#f0b429;color:#111;border-radius:999px;font-size:.36em;padding:0 .45em\">+3</span></div>\n<div style=\"flex:1;display:grid;grid-template-columns:1fr 1fr;gap:.35em;align-content:center\"><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">🔪 Violent</span><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">💸 White-collar</span><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">💻 Cyber</span><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">💣 Terror</span></div></div></div>"}, "zh": {"title": "🔎 再看一眼", "steps": ["一張真實的 FBI 通緝照，只看臉。", "猜 FBI 把這個人歸在哪一類，點一下就好。", "憑直覺猜中 +3；偷看 💡 線索再猜中 +1。"], "example": "<style>@media (orientation:landscape) and (max-height:520px){.mx-look{display:none}}</style><div class=\"mx-look\"><div aria-hidden=\"true\" style=\"display:flex;gap:.6em;align-items:stretch;font-size:.85em\">\n<div style=\"flex:none;width:4.2em;aspect-ratio:3/4;border-radius:.45em;background:#ece6d6;color:#1d1b17;display:flex;align-items:center;justify-content:center;font:900 1.9em system-ui,sans-serif;position:relative\">?<span style=\"position:absolute;top:.25em;right:.25em;background:#f0b429;color:#111;border-radius:999px;font-size:.36em;padding:0 .45em\">+3</span></div>\n<div style=\"flex:1;display:grid;grid-template-columns:1fr 1fr;gap:.35em;align-content:center\"><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">🔪 暴力</span><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">💸 白領</span><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">💻 網路</span><span style=\"padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2\">💣 恐攻</span></div></div></div>"}},K="howto_la4",UI={en:{ok:"Got it",q:"How to play"},zh:{ok:"懂了",q:"怎麼玩"}};
 const st=document.createElement("style");st.textContent=".howto-q{flex:none;align-self:center;width:1.9em;height:1.9em;min-width:28px;min-height:28px;padding:0;margin:0 .35em;border-radius:50%;border:2px solid currentColor;background:transparent;color:inherit;font:900 15px/1 system-ui,sans-serif;opacity:.8;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;touch-action:manipulation}\n.howto-q:hover,.howto-q:focus-visible{opacity:1}\n.howto{position:fixed;inset:0;z-index:2147483000;background:#000a;display:flex;align-items:center;justify-content:center;padding:max(12px,env(safe-area-inset-top)) 12px max(12px,env(safe-area-inset-bottom));font-family:system-ui,-apple-system,\"PingFang TC\",\"Noto Sans TC\",sans-serif}\n.howto[hidden]{display:none!important}\n.howto,.howto *{box-sizing:border-box;text-transform:none;letter-spacing:normal}\n.howto .howto-ok{display:block!important;width:100%;margin:0;min-height:0;height:auto;line-height:1.2;text-align:center;box-shadow:none;border:0;text-transform:none;letter-spacing:normal}\n.howto .howto-card{width:min(26rem,100%);max-height:100%;overflow:hidden;background:#17181d;color:#f3f1ec;border:1px solid #ffffff2a;border-radius:14px;box-shadow:0 12px 40px #000c;padding:clamp(12px,3.2vh,20px) clamp(14px,4.5vw,22px);display:flex;flex-direction:column;gap:clamp(8px,1.8vh,14px);text-align:left}\n.howto .howto-t{margin:0;padding:0;border:0;background:none;color:inherit;text-align:left;font-family:inherit;font-size:clamp(17px,min(5.4vw,3.4vh),22px);font-weight:900;line-height:1.2}\n.howto .howto-steps{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:clamp(5px,1.2vh,9px);counter-reset:h}\n.howto .howto-steps>li{counter-increment:h;margin:0;padding:0;border:0;background:none;color:inherit;text-align:left;font-weight:500;display:flex;gap:.6em;align-items:flex-start;font-size:clamp(14px,min(4.2vw,2.5vh),17px);line-height:1.35}\n.howto .howto-steps>li::before{content:counter(h);flex:none;width:1.5em;height:1.5em;border-radius:50%;background:#ffd84a;color:#111;font-weight:900;font-size:.85em;display:flex;align-items:center;justify-content:center;margin-top:.1em}\n.howto .howto-ex{font-size:clamp(13px,min(4vw,2.3vh),16px)}\n.howto .howto-ex:empty{display:none}\n.howto .howto-ok{align-self:stretch;border:0;border-radius:10px;background:#ffd84a;color:#111;font:900 clamp(15px,min(4.6vw,2.8vh),18px) system-ui,sans-serif;padding:clamp(9px,1.8vh,13px);cursor:pointer;touch-action:manipulation}\n@media (orientation:landscape) and (max-height:520px){.howto .howto-card{width:min(44rem,100%);display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto 1fr auto;column-gap:18px;row-gap:8px}\n .howto .howto-t{grid-column:1/-1}.howto .howto-steps{grid-column:1}.howto .howto-ex{grid-column:2;grid-row:2/4;align-self:center}.howto .howto-ok{grid-column:1}.howto .howto-ex svg{max-height:52vh!important}}";document.head.appendChild(st);
 const L=()=>D.zh&&/^zh/i.test(document.documentElement.lang||"")?"zh":"en";
 const ov=document.createElement("div");ov.className="howto";ov.hidden=true;ov.setAttribute("role","dialog");ov.setAttribute("aria-modal","true");ov.setAttribute("aria-labelledby","howtoT");
