@@ -40,6 +40,23 @@ GRAPHIC = re.compile(r"dismember|decapitat|mutilat|tortur|\brap(e|ed|es|ing|ist)
     r"beaten to death|beat\w* to death|burned alive|set (him|her) on fire|corpse|cadaver|pornograph|exploitation|obscen|"
     r"\bremains\b|skeletal|\bbod(y|ies)\b|decompos|dead body|grave\b|autopsy|blood|gore|severed|throat|naked|nude|"
     r"incest|pedophil|child abuse|minor victim|enticement|lewd|genital", re.I)
+# Agencies do not consistently tag crimes against children in their child-crime lists.
+# Review the victim/charge wording too; nutrition-program fraud and suspects' own children are not child-victim cases.
+CHILD_CRIME = re.compile(r"cruelty to children|use of minors|child (abuse|porn|exploitation)|"
+    r"(?:murder|kill|kidnap|hostage|death|abduct).{0,180}(?:\bchildren\b|\bchild\b|infant|baby|toddler|\b(?:[1-9]|1[0-7])[- ]year[- ]old)|"
+    r"(?:\bchildren\b|infant|baby|toddler|\b(?:[1-9]|1[0-7])[- ]year[- ]old).{0,100}(?:hostage|shot|killed|murder|kidnap)", re.I)
+CHILD_CASES = {  # hand-reviewed wording that crosses sentence boundaries (the raw source is still the authority)
+    '1e95dff036d440b1a0a8fd25649ccfa7',  # Nazeer Hameed: woman and her six-year-old son
+    '367dfdc4df89411aa6277af54277ee2b',  # Manuel Virgen-Galvan: 14-year-old boy
+    'a7a9c7e0f2534d888a4b9d63401360b4',  # Caitlan Coleman kidnappers: captive children
+    '466379d55d804fdeabfc3944c5d44331',  # Vitel'homme Innocent: hostages include five children
+    '9c4293ddbdb54b0a9505be2a3c34ae81',  # Lanmo Sanjou: same hostage case
+    '6538a957-1814-4b9f-a836-5109bed058a7',  # Caris E. Ayala: five-month-old victim
+    'e3e4565e4eeffe4e4177119058ee867d',  # Husayn Al-Umari: 16-year-old passenger killed
+    '83a7764745a647a8b37fdab212c6c81b',  # Robert William Fisher: wife and two children
+    '97a0cc1bbe4f103ee8af0b76d61fbb27',  # Miguel Hermosillio-Alcaraz: child present during killing
+    'dea-kenny-jing-ang-chen',  # use of minors in drug trafficking
+}
 DEATH = re.compile(r"murder\w*|\bkill\w*|homicide|\bshot\b|shooting|\bdeath\b|\bdied\b|deceased|found dead|homicide victim|was killed|were killed|murder of (a |an )?(\d|child|infant|baby|toddler|girl|boy)", re.I)
 
 PHYS = re.compile(r"\b(white|black(?! Hills)|hispanic|latino|latina|latinx|asian|caucasian|african|(?<!presidential )race|racial|ethnic\w*|complexion|skin|hair|bald|eyes?|"
@@ -421,6 +438,7 @@ def build(items):
         main = text(it.get('caution')) or text(it.get('details'))
         alltext = ' '.join([it.get('title') or '', text(it.get('description')), text(it.get('caution')), text(it.get('details')),
                             text(it.get('remarks')), text(it.get('additional_information'))])
+        if it['uid'] in CHILD_CASES or CHILD_CRIME.search(alltext): skip('child-crime'); continue
         if GRAPHIC.search(alltext): skip('graphic'); continue
         if b in ('missing', 'seeking') and not sus and DEATH.search(alltext): skip('death'); continue
         if b == 'seeking' and it.get('person_classification') == 'Victim': skip('seeking-victim'); continue
@@ -536,6 +554,7 @@ def add_agencies(cases):
         if (GRAPHIC.search(alltext) and CHILD.search(alltext)) or re.search(r'child (sex|porn|exploit|molest)|sexual\w* (abuse|assault|exploit)\w* (of )?(a )?(child|minor)|'
                                                                             r'(to|of|against) (a|the) (child|minor)|\b([1-9]|1[0-7])[- ]year[- ]old', alltext, re.I):   # crimes against children: never in the game
             skip('child-sex'); continue
+        if it['id'] in CHILD_CASES or CHILD_CRIME.search(alltext): skip('child-crime'); continue
         rawtext = alltext
         story = [x for x in sentences(' '.join(story)) if not GRAPHIC.search(x) and not PHYS.search(x) and not re.search(r'NOTICE TO LAW ENFORCEMENT|\bNCIC\b|whereabouts known|presumed innocent', x, re.I)][:8]
         if GRAPHIC.search(ch): ch = '; '.join(x.strip() for x in re.split(r',|;| and ', re.sub(r'\.$', '', ch)) if x.strip() and not GRAPHIC.search(x)) or ''
